@@ -9,9 +9,11 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_cl
 from flask_bootstrap import Bootstrap
 from wtforms import StringField, IntegerField, SubmitField, SelectField
 from wtforms.validators import DataRequired
+from db import DB
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
+db = DB()
 
 # Configurations
 app.config['SECRET_KEY'] = 'blah blah blah blah'

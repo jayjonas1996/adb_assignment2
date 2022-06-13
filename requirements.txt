@@ -19,3 +19,5 @@ azure-storage-blob==12.12.0
 
 #Pin
 markupsafe==2.0.1
+pyodbc==4.0.32
+pymssql==2.2.5
