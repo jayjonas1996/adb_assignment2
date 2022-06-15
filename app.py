@@ -1,3 +1,9 @@
+'''
+Name: Jaykumar Naik
+ID: 1001865454
+Assignment: 2
+Web url: 
+'''
 import os
 import shutil
 import csv
@@ -31,6 +37,16 @@ def index():
 		return render_template('index.html',form=form,name=name)
 	return render_template('index.html',form=form,name=None)
 
+
+@app.route('/eq', methods=['GET', 'POST'])
+def eq():
+	db = DB()
+	c, r = db.get()
+	db.close()
+	return render_template('eq.html',columns=c, data=r)
+
+
+###
 @app.route('/help')
 def help():
 	text_list = []
