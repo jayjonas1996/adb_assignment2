@@ -53,9 +53,10 @@ class DB:
         a = list(df[['blocks', 'time']].groupby(['blocks']).count().index)
         b = list(df[['blocks', 'time']].groupby(['blocks']).count().values)
         v = []
-        print(list(zip(a, b)))
+        
         for x, y in zip(a, b):
             v.append([x, y[0]])
+
         return ['blocks', 'count'], v
 
     def _execute(self, query, data=()):

@@ -73,8 +73,8 @@ def cluster():
 	db = DB()
 	data = dict()
 	data['columns'], data['rows'] = db.query_cluster()
-	# print(data['rows'])
-	return render_template('eq.html', data=data)
+	
+	return render_template('eq.html', data=data, count=len(data['rows']))
 
 ###
 @app.route('/help')
