@@ -41,9 +41,12 @@ def index():
 
 @app.route('/eq', methods=['GET', 'POST'])
 def eq():
+	# Earthquake route to present form and search for warthquakes 
+	# accordingly on the data hosted on sql cloud
 	forms = [SearchRangeForm(), SearchNearestForm()]
 	data = {}
 
+	# Check for the range search form and query accorind to the data
 	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
 		form = forms[0]
 		mi = form.mi.data
@@ -53,7 +56,7 @@ def eq():
 
 		db = DB()
 		data['columns'], data['rows'] = db.query_range(mi, ma, metric, offset)
-
+	# Check for the radius form and query accordingly
 	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
 		form = forms[1]
 		lat = form.lat.data
@@ -65,6 +68,13 @@ def eq():
 
 	return render_template('eq.html',data=data, forms=forms, count=len(data.get('rows', [])))
 
+@app.route('/cluster', methods=['GET', 'POST'])
+def cluster():
+	db = DB()
+	data = dict()
+	data['columns'], data['rows'] = db.query_cluster()
+	# print(data['rows'])
+	return render_template('eq.html', data=data)
 
 ###
 @app.route('/help')

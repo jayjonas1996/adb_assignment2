@@ -1,11 +1,15 @@
 import os
 from datetime import datetime, timedelta
 import pymssql
+import pandas as pd
+import numpy as np
 
 SERVER = 'jknadb.database.windows.net'
 USER = 'user'
 _DB = 'assignment1'
 
+# Database interfac class to interact with the hosted sql database
+# with resuable dynamic modular functinos
 class DB:
 
     columns = ['time', 'latitude', 'longitude', 'depth', 'mag', 'magtype', 'nst', 'gap', 'dmin', 
@@ -38,6 +42,21 @@ class DB:
     def query_radius(self, lat, lon, radius):
         rows = self._execute("select * from test0 where ((geography::Point(%d, %d, 4326).STDistance(geography::Point(latitude, longitude, 4326))) / 1000)  < %d;", (lat, lon, radius))
         return self.cols, rows
+
+    def query_cluster(self):
+        rows = self._execute("SELECT * from test0")
+        df = pd.DataFrame(rows, columns=self.columns)
+        a = pd.cut(df["longitude"], np.arange(-180, 180 + 30, 30), labels=[str(x) for x in range(int(360 / 30))])
+        b = pd.cut(df["latitude"],  np.arange(-90, 90 + 30, 30),   labels=[str(x) for x in range(int(180 / 30))])
+        
+        df['blocks'] = [f"{a}-{b}" for a, b in zip(a, b)]
+        a = list(df[['blocks', 'time']].groupby(['blocks']).count().index)
+        b = list(df[['blocks', 'time']].groupby(['blocks']).count().values)
+        v = []
+        print(list(zip(a, b)))
+        for x, y in zip(a, b):
+            v.append([x, y[0]])
+        return ['blocks', 'count'], v
 
     def _execute(self, query, data=()):
         try:

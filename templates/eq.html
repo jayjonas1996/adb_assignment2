@@ -7,18 +7,6 @@
         padding: 3px;
     }
 </style>
-<script>
-
-window.addEventListener("load", function(event) {
-        fetch('https://maps.googleapis.com/maps/api/geocdode/json?address=wolff+hall+uta&key=AIzaSyCBoTzqU1l6RzRNcBUYuPMAdwUluDlqQ7I').then(
-            function(response) {
-        if (response.status !== 200) {
-            response.json().then(function(data) {
-                console.log(data.geometry.location);
-            });
-        }})
-    });
-</script>
 
 
 {% if forms %}
