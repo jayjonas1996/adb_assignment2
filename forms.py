@@ -19,6 +19,7 @@ class SearchNearestForm(FlaskForm):
     submit = SubmitField('Submit_2', name='submit')
 
 class ClusterForm(FlaskForm):
+    # WT form for finding clusters in a bounding box of coordinates with interval for partitioning
     lat_from = FloatField('Latitude from', [validators.InputRequired()])
     lat_to = FloatField('Latitude to', [validators.InputRequired()])
     lon_from = FloatField('Longitude from', [validators.InputRequired()])
