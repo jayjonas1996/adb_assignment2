@@ -1,5 +1,5 @@
 import os
-# import pandas as pd
+from datetime import datetime, timedelta
 import pymssql
 
 SERVER = 'jknadb.database.windows.net'
@@ -20,28 +20,24 @@ class DB:
         cursor = self.conn.cursor()
         cursor.execute("select COLUMN_NAME from INFORMATION_SCHEMA.columns where TABLE_NAME = 'test0';")
         self.cols = [x[0] for x in cursor.fetchall()]
-        
-    def get(self):
-        cursor = self.conn.cursor()
-        cursor.execute(f"""Declare @source geography = geography::Point(%d, %d, 4326);
-                           select * from test0 where ((@source.STDistance(geography::Point(latitude, longitude, 4326))) / 1000)  < %d;""", (DB.lat, DB.lon, 300))
-        rows = cursor.fetchall()
-        return columns, rows
 
-    def query_range(self, mi, ma):
-        rows = self._execute('SELECT * from [dbo].[test0] where mag BETWEEN %d AND %d', mi, ma)
+    def query_range(self, mi, ma, metric, offset):
+        datetime.today() - timedelta(weeks=1)
+        today = f"{datetime.now():%Y-%m-%d %H:%M:%S}"
+        past = self.timed(metric, offset)
+        rows = self._execute('SELECT * from test0 where mag BETWEEN %d AND %d AND time BETWEEN %s and %s', (mi, ma, past, today))
         return rows
 
     def query_radius(self, lat, lon, radius):
         rows = self._execute("select * from test0 where ((geography::Point(%d, %d, 4326).STDistance(geography::Point(latitude, longitude, 4326))) / 1000)  < %d;", (lat, lon, radius))
         return rows
-    
+
     def _execute(self, query, data=()):
         try:
             cursor = self.conn.cursor()
             cursor.execute(query, data)
             rows = cursor.fetchall()
-        except e as Exception:
+        except Exception as e:
             print(e)
             rows = []
         finally:
@@ -51,3 +47,9 @@ class DB:
 
     def close(self):
         self.conn.close()
+    
+    def timed(self, metric, offset):
+        return f"""{datetime.today() - timedelta(weeks=offset if metric == 'weeks' else 0, 
+                    days=offset if metric == 'days' else 0):%Y-%m-%d %H:%M:%S}"""
+        
+

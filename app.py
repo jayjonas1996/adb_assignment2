@@ -43,14 +43,17 @@ def index():
 def eq():
 	forms = [SearchRangeForm(), SearchNearestForm()]
 	data = {}
+
 	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
 		form = forms[0]
 		mi = form.mi.data
-		mx = form.ma.data
+		ma = form.ma.data
+		metric = form.metric.data
+		offset = form.offset.data
 
 		db = DB()
 		data['columns'] = db.cols
-		data['rows'] = db.query_range(mi, ma)
+		data['rows'] = db.query_range(mi, ma, metric, offset)
 
 	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
 		form = forms[1]
