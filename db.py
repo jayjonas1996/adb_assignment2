@@ -43,11 +43,11 @@ class DB:
         rows = self._execute("select * from test0 where ((geography::Point(%d, %d, 4326).STDistance(geography::Point(latitude, longitude, 4326))) / 1000)  < %d;", (lat, lon, radius))
         return self.cols, rows
 
-    def query_cluster(self):
+    def query_cluster(self, lat_from, lat_to, lon_from, lon_to, interval):
         rows = self._execute("SELECT * from test0")
         df = pd.DataFrame(rows, columns=self.columns)
-        a = pd.cut(df["longitude"], np.arange(-180, 180 + 30, 30), labels=[str(x) for x in range(int(360 / 30))])
-        b = pd.cut(df["latitude"],  np.arange(-90, 90 + 30, 30),   labels=[str(x) for x in range(int(180 / 30))])
+        a = pd.cut(df["longitude"], np.arange(lon_from, lon_to + interval, interval), labels=[str(x) for x in range(int((lon_to - lon_from) / interval))])
+        b = pd.cut(df["latitude"],  np.arange(lat_from, lat_to + interval, interval),   labels=[str(x) for x in range(int((lat_to - lat_from) / interval))])
         
         df['blocks'] = [f"{a}-{b}" for a, b in zip(a, b)]
         a = list(df[['blocks', 'time']].groupby(['blocks']).count().index)

@@ -17,3 +17,11 @@ class SearchNearestForm(FlaskForm):
     lon = FloatField('Longitude', [validators.InputRequired()])
     radius = FloatField('Range (in KM)', [validators.InputRequired()])
     submit = SubmitField('Submit_2', name='submit')
+
+class ClusterForm(FlaskForm):
+    lat_from = FloatField('Latitude from', [validators.InputRequired()])
+    lat_to = FloatField('Latitude to', [validators.InputRequired()])
+    lon_from = FloatField('Longitude from', [validators.InputRequired()])
+    lon_to = FloatField('longitude to', [validators.InputRequired()])
+    interval = FloatField('Interval', [validators.InputRequired()])
+    submit = SubmitField('Submit', name='submit')

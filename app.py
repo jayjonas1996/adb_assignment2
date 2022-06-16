@@ -13,10 +13,9 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_bootstrap import Bootstrap
 from wtforms import StringField, IntegerField, SubmitField, SelectField
-# from wtforms.validators import DataRequired
 
 from db import DB
-from forms import SearchRangeForm, SearchNearestForm
+from forms import SearchRangeForm, SearchNearestForm, ClusterForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -70,11 +69,19 @@ def eq():
 
 @app.route('/cluster', methods=['GET', 'POST'])
 def cluster():
-	db = DB()
-	data = dict()
-	data['columns'], data['rows'] = db.query_cluster()
+	data = {}
+	form = ClusterForm()
+	if form.validate_on_submit():
+		db = DB()
+		lat_from = form.lat_from.data
+		lat_to = form.lat_to.data
+		lon_from = form.lon_from.data
+		lon_to = form.lon_to.data
+		interval = form.interval.data
+		
+		data['columns'], data['rows'] = db.query_cluster(lat_from, lat_to, lon_from, lon_to, interval)
 	
-	return render_template('eq.html', data=data, count=len(data['rows']))
+	return render_template('eq.html', data=data, forms=[form], count=len(data.get('rows', [])))
 
 ###
 @app.route('/help')
