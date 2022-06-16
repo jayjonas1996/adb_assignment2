@@ -7,20 +7,35 @@
         padding: 3px;
     }
 </style>
+<script>
+
+window.addEventListener("load", function(event) {
+        fetch('https://maps.googleapis.com/maps/api/geocdode/json?address=wolff+hall+uta&key=AIzaSyCBoTzqU1l6RzRNcBUYuPMAdwUluDlqQ7I').then(
+            function(response) {
+        if (response.status !== 200) {
+            response.json().then(function(data) {
+                console.log(data.geometry.location);
+            });
+        }})
+    });
+</script>
 
 
-{% if form%}
-    {{ wtf.quick_form(form) }}
+{% if forms %}
+    {% for form in forms %}
+        {{ wtf.quick_form(form) }}
+    {% endfor %}
 {% endif %}
 
 {% if data %}
+<h3>Count: {{ count }} rows</h3>
 <table>
     <tr>
-        {% for column in columns %}
+        {% for column in data.columns %}
             <th>{{ column }}</th>
         {% endfor %}
     </tr>
-    {% for row in data %}
+    {% for row in data.rows %}
         <tr>
             {% for r in row %}
                 <td>{{ r }}</td>

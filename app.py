@@ -6,7 +6,6 @@ Web url:
 '''
 import os
 import shutil
-import csv
 import sys
 from flask import Flask,render_template, url_for, flash, redirect, request
 from flask_wtf import FlaskForm
@@ -14,8 +13,10 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_bootstrap import Bootstrap
 from wtforms import StringField, IntegerField, SubmitField, SelectField
-from wtforms.validators import DataRequired
+# from wtforms.validators import DataRequired
+
 from db import DB
+from forms import SearchRangeForm, SearchNearestForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -40,10 +41,28 @@ def index():
 
 @app.route('/eq', methods=['GET', 'POST'])
 def eq():
-	db = DB()
-	c, r = db.get()
-	db.close()
-	return render_template('eq.html',columns=c, data=r)
+	forms = [SearchRangeForm(), SearchNearestForm()]
+	data = {}
+	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
+		form = forms[0]
+		mi = form.mi.data
+		mx = form.ma.data
+
+		db = DB()
+		data['columns'] = db.cols
+		data['rows'] = db.query_range(mi, ma)
+
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
+		form = forms[1]
+		lat = form.lat.data
+		lon = form.lon.data
+		radius = form.radius.data
+
+		db = DB()
+		data['columns'] = db.cols
+		data['rows'] = db.query_radius(lat, lon, radius)
+
+	return render_template('eq.html',data=data, forms=forms, count=len(data.get('rows', [])))
 
 
 ###
@@ -81,6 +100,6 @@ def page_not_found(error):
 def requests_error(error):
 	return render_template('500.html',title='500')
 
-if os.environ.get('env') == 'local':
+if os.environ.get('ENV') == 'local':
 	port = int(os.getenv('PORT', '3000'))
 	app.run(host='0.0.0.0', port=port, debug=True)
