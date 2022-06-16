@@ -4,10 +4,10 @@ from flask_wtf import FlaskForm
 
 
 class SearchRangeForm(FlaskForm):
-    mi = IntegerField('min', [validators.InputRequired()])
-    ma = IntegerField('max', [validators.InputRequired()])
-    metric = SelectField('select one', choices=[('months', 'Months'), ('days', 'Days')])
-    offset = IntegerField('offset', [validators.InputRequired()])
+    mi = FloatField('min', [validators.Optional()])
+    ma = FloatField('max', [validators.Optional()])
+    metric = SelectField('select one', choices=[('days', 'Days'), ('months', 'Months')])
+    offset = IntegerField('offset', [validators.Optional()])
     submit = SubmitField('Submit_1', name='submit')
 
 class SearchNearestForm(FlaskForm):

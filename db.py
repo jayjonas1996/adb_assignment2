@@ -21,11 +21,18 @@ class DB:
         cursor.execute("select COLUMN_NAME from INFORMATION_SCHEMA.columns where TABLE_NAME = 'test0';")
         self.cols = [x[0] for x in cursor.fetchall()]
 
-    def query_range(self, mi, ma, metric, offset):
+    def query_range(self, mi, ma, metric, offset=None):
         datetime.today() - timedelta(weeks=1)
         today = f"{datetime.now():%Y-%m-%d %H:%M:%S}"
-        past = self.timed(metric, offset)
-        rows = self._execute('SELECT * from test0 where mag BETWEEN %d AND %d AND time BETWEEN %s and %s', (mi, ma, past, today))
+        if offset:
+            past = self.timed(metric, offset)
+            rows = self._execute('SELECT * from test0 where mag BETWEEN %d AND %d AND time BETWEEN %s and %s', (mi, ma, past, today))
+        elif mi and ma:
+            rows = self._execute('SELECT * from test0 where mag BETWEEN %d AND %d', (mi, ma))
+        elif mi:
+            rows = self._execute('SELECT * from test0 where mag >= %d', (mi))
+        elif ma:
+            rows = self._execute('SELECT * from test0 where mag <= %d', (ma))
         return rows
 
     def query_radius(self, lat, lon, radius):

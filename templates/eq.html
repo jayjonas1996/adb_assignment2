@@ -24,6 +24,7 @@ window.addEventListener("load", function(event) {
 {% if forms %}
     {% for form in forms %}
         {{ wtf.quick_form(form) }}
+        <br/>
     {% endfor %}
 {% endif %}
 
