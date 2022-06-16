@@ -81,5 +81,6 @@ def page_not_found(error):
 def requests_error(error):
 	return render_template('500.html',title='500')
 
-port = int(os.getenv('PORT', '3000'))
-app.run(host='0.0.0.0', port=port, debug=True)
+if os.environ.get('env') == 'local':
+	port = int(os.getenv('PORT', '3000'))
+	app.run(host='0.0.0.0', port=port, debug=True)
