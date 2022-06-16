@@ -33,11 +33,11 @@ class DB:
             rows = self._execute('SELECT * from test0 where mag >= %d', (mi))
         elif ma:
             rows = self._execute('SELECT * from test0 where mag <= %d', (ma))
-        return rows
+        return self.cols, rows
 
     def query_radius(self, lat, lon, radius):
         rows = self._execute("select * from test0 where ((geography::Point(%d, %d, 4326).STDistance(geography::Point(latitude, longitude, 4326))) / 1000)  < %d;", (lat, lon, radius))
-        return rows
+        return self.cols, rows
 
     def _execute(self, query, data=()):
         try:

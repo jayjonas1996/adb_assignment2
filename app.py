@@ -52,8 +52,7 @@ def eq():
 		offset = form.offset.data
 
 		db = DB()
-		data['columns'] = db.cols
-		data['rows'] = db.query_range(mi, ma, metric, offset)
+		data['columns'], data['rows'] = db.query_range(mi, ma, metric, offset)
 
 	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
 		form = forms[1]
@@ -62,8 +61,7 @@ def eq():
 		radius = form.radius.data
 
 		db = DB()
-		data['columns'] = db.cols
-		data['rows'] = db.query_radius(lat, lon, radius)
+		data['columns'], data['rows'] = db.query_radius(lat, lon, radius)
 
 	return render_template('eq.html',data=data, forms=forms, count=len(data.get('rows', [])))
 
