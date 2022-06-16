@@ -18,6 +18,14 @@ class SearchNearestForm(FlaskForm):
     radius = FloatField('Range (in KM)', [validators.InputRequired()])
     submit = SubmitField('Submit_2', name='submit')
 
+class SearchNearestWithMagRange(FlaskForm):
+    # WT form for finding nearest earthquake from a location in a magnitude range
+    mi = FloatField('min', [validators.Optional()])
+    ma = FloatField('max', [validators.Optional()])
+    lat = FloatField('Latitude', [validators.InputRequired()])
+    lon = FloatField('Longitude', [validators.InputRequired()])
+    submit = SubmitField('Submit_3', name='submit')
+
 class ClusterForm(FlaskForm):
     # WT form for finding clusters in a bounding box of coordinates with interval for partitioning
     lat_from = FloatField('Latitude from', [validators.InputRequired()])

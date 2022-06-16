@@ -43,6 +43,19 @@ class DB:
         rows = self._execute("select * from test0 where ((geography::Point(%d, %d, 4326).STDistance(geography::Point(latitude, longitude, 4326))) / 1000)  < %d;", (lat, lon, radius))
         return self.cols, rows
 
+    def query_nearest_mag(self, lat, lon, mi, ma):
+        if mi and ma:
+            rows = self._execute("""select time, place, mag, ((geography::Point(%d, %d, 4326).STDistance(geography::Point(latitude, longitude, 4326))) / 1000) 
+                            as 'dist' from test0 where mag >= %d order by 'dist'""", (lat, lon, mi, ma))
+        elif mi:
+            rows = self._execute("""select time, place, mag, ((geography::Point(%d, %d, 4326).STDistance(geography::Point(latitude, longitude, 4326))) / 1000) 
+                            as 'dist' from test0 where mag >= %d order by 'dist'""", (lat, lon, mi))
+        elif ma:
+            rows = self._execute("""select time, place, mag, ((geography::Point(%d, %d, 4326).STDistance(geography::Point(latitude, longitude, 4326))) / 1000) 
+                            as 'dist' from test0 where mag <= %d order by 'dist'""", (lat, lon, ma))
+    
+        return ['Time', 'Place', 'Magnitude', 'distance in KM'], rows
+
     def query_cluster(self, lat_from, lat_to, lon_from, lon_to, interval):
         rows = self._execute("SELECT * from test0")
         df = pd.DataFrame(rows, columns=self.columns)

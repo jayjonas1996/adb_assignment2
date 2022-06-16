@@ -15,7 +15,7 @@ from flask_bootstrap import Bootstrap
 from wtforms import StringField, IntegerField, SubmitField, SelectField
 
 from db import DB
-from forms import SearchRangeForm, SearchNearestForm, ClusterForm
+from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -42,7 +42,7 @@ def index():
 def eq():
 	# Earthquake route to present form and search for warthquakes 
 	# accordingly on the data hosted on sql cloud
-	forms = [SearchRangeForm(), SearchNearestForm()]
+	forms = [SearchRangeForm(), SearchNearestForm(), SearchNearestWithMagRange()]
 	data = {}
 
 	# Check for the range search form and query accorind to the data
@@ -64,6 +64,16 @@ def eq():
 
 		db = DB()
 		data['columns'], data['rows'] = db.query_radius(lat, lon, radius)
+	# Check for the nearest magnitude form and query the database accordingly
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_3' and forms[2].validate_on_submit():
+		form = forms[2]
+		lat = form.lat.data
+		lon = form.lon.data
+		mi = form.mi.data
+		ma = form.ma.data
+
+		db = DB()
+		data['columns'], data['rows'] = db.query_nearest_mag(lat, lon, mi, ma)
 
 	return render_template('eq.html',data=data, forms=forms, count=len(data.get('rows', [])))
 
