@@ -15,6 +15,7 @@ class DB:
     columns = ['time', 'latitude', 'longitude', 'depth', 'mag', 'magtype', 'nst', 'gap', 'dmin', 
                'rms', 'net', 'id', 'updated', 'place', 'type', 'horizontalerror', 'deptherror', 
                'magerror', 'magnst', 'status', 'localsource', 'magsource']
+    columns2 = ['time', 'latitude', 'longitude', 'id', 'place'] #['time', 'latitude', 'longitude', 'depth', 'mag', 'magType', 'net', 'id', 'place', 'horizontalerror', 'magerror', 'magnst', 'locationsource']
 
     cols = []
     conn = None
@@ -71,8 +72,28 @@ class DB:
             v.append([x, y[0]])
 
         return ['blocks', 'count'], v
+    
+    def query_bound(self, lat_from, lat_to, lon_from, lon_to):
+        rows = self._execute("""select time, latitude, longitude, id, place from quiz2 where latitude between %d and %d and longitude between %d and %d""", (lat_from, lat_to, lon_from, lon_to))
+        return self.columns2, rows
 
-    def _execute(self, query, data=()):
+    def query_net(self, net, mi, ma):
+        rows = self._execute("""select top 5 time, latitude, longitude, id, place from quiz2 where net = %s and mag between %d and %d""", (net, mi, ma))
+        return self.columns2, rows
+    
+    def query_date(self, date):
+        rows = self._execute("""select top 1 net, count(*) as 'occurance' from quiz2 
+                                where time between DATETIMEFROMPARTS(%d, %d, %d, 0, 0, 0, 0) 
+                                and DATETIMEFROMPARTS(%d, %d, %d, 23, 59, 59, 999) group by net order by 'occurance' desc""",(date.year, date.month, date.day, date.year, date.month, date.day), close=False)
+        print(rows)
+        
+        rows2 = self._execute("""select top 1 net, count(*) as 'occurance' from quiz2 
+                                where time between DATETIMEFROMPARTS(%d, %d, %d, 0, 0, 0, 0) 
+                                and DATETIMEFROMPARTS(%d, %d, %d, 23, 59, 59, 999) group by net order by 'occurance'""",(date.year, date.month, date.day, date.year, date.month, date.day))
+
+        return ['net', 'frequency'], rows
+
+    def _execute(self, query, data=(), close=True):
         try:
             cursor = self.conn.cursor()
             cursor.execute(query, data)
@@ -81,7 +102,8 @@ class DB:
             print(e)
             rows = []
         finally:
-            self.close()
+            if close:
+                self.close()
 
         return rows
 

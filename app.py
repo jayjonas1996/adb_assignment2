@@ -15,7 +15,8 @@ from flask_bootstrap import Bootstrap
 from wtforms import StringField, IntegerField, SubmitField, SelectField
 
 from db import DB
-from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm
+from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
+		BoundForm, NetMagRangeForm, DateForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -75,6 +76,36 @@ def eq():
 		db = DB()
 		data['columns'], data['rows'] = db.query_nearest_mag(lat, lon, mi, ma)
 
+	return render_template('eq.html',data=data, forms=forms, count=len(data.get('rows', [])))
+
+@app.route('/quiz2', methods=['GET', 'POST'])
+def quiz2():
+	forms = [BoundForm(), NetMagRangeForm(), DateForm()]
+	data = {}
+	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
+		form = forms[0]
+		lat_from = form.lat_from.data
+		lat_to = form.lat_to.data
+		lon_from = form.lon_from.data
+		lon_to = form.lon_to.data
+
+		db = DB()
+		data['columns'], data['rows'] = db.query_bound(lat_from, lat_to, lon_from, lon_to)
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
+		form = forms[1]
+		mi = form.mi.data
+		ma = form.ma.data
+		net = form.net.data
+
+		db = DB()
+		data['columns'], data['rows'] = db.query_net(net, mi, ma)		
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_3' and forms[2].validate_on_submit():
+		form = forms[2]
+		d = form.d.data
+		db = DB()
+		data['columns'], data['rows'] = db.query_date(d)
+
+	
 	return render_template('eq.html',data=data, forms=forms, count=len(data.get('rows', [])))
 
 @app.route('/cluster', methods=['GET', 'POST'])

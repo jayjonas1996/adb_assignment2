@@ -1,4 +1,4 @@
-from wtforms import StringField, IntegerField, SubmitField, FloatField, SelectField
+from wtforms import StringField, IntegerField, SubmitField, FloatField, SelectField, DateField
 from wtforms import validators
 from flask_wtf import FlaskForm
 
@@ -34,3 +34,20 @@ class ClusterForm(FlaskForm):
     lon_to = FloatField('longitude to', [validators.InputRequired()])
     interval = FloatField('Interval', [validators.InputRequired()])
     submit = SubmitField('Submit', name='submit')
+
+class BoundForm(FlaskForm):
+    lat_from = FloatField('Latitude from', [validators.InputRequired()])
+    lat_to = FloatField('Latitude to', [validators.InputRequired()])
+    lon_from = FloatField('Longitude from', [validators.InputRequired()])
+    lon_to = FloatField('longitude to', [validators.InputRequired()])
+    submit = SubmitField('Submit_1', name='submit')
+
+class NetMagRangeForm(FlaskForm):
+    mi = FloatField('min', [validators.InputRequired()])
+    ma = FloatField('max', [validators.InputRequired()])
+    net = StringField('net', [validators.InputRequired()])
+    submit = SubmitField('Submit_2', name='submit')
+
+class DateForm(FlaskForm):
+    d = DateField('date')
+    submit = SubmitField('Submit_3', name='submit')
