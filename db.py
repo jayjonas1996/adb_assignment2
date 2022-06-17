@@ -90,7 +90,7 @@ class DB:
         rows2 = self._execute("""select top 1 net, count(*) as 'occurance' from quiz2 
                                 where time between DATETIMEFROMPARTS(%d, %d, %d, 0, 0, 0, 0) 
                                 and DATETIMEFROMPARTS(%d, %d, %d, 23, 59, 59, 999) group by net order by 'occurance'""",(date.year, date.month, date.day, date.year, date.month, date.day))
-
+        rows.append(rows2[0])
         return ['net', 'frequency'], rows
 
     def _execute(self, query, data=(), close=True):
