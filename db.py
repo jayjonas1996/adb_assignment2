@@ -95,11 +95,11 @@ class DB:
         return ['net', 'frequency'], rows
     
     def query_modify_net(self, net1, net2):
-        rows = self._execute("""update quiz2 set net = %s where net = %s""", (net2, net1), close=False, fetch=False)
-        row_count = self.conn.cursor().rowcount
-        print(row_count)
+        rows = self._execute("""select * from quiz2 where net = %s""", (net1), close=False)
+        self._execute("""update quiz2 set net = %s where net = %s""", (net2, net1), close=False, fetch=False)
         self.conn.commit()
-        
+        row_count = len(rows)
+        print(row_count)
         self.close()
         return ['affected rows'], [[row_count]]
 
