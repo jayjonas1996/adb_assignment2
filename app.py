@@ -16,7 +16,7 @@ from wtforms import StringField, IntegerField, SubmitField, SelectField
 
 from db import DB
 from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
-		BoundForm, NetMagRangeForm, DateForm
+		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -80,7 +80,7 @@ def eq():
 
 @app.route('/quiz2', methods=['GET', 'POST'])
 def quiz2():
-	forms = [BoundForm(), NetMagRangeForm(), DateForm()]
+	forms = [BoundForm(), NetMagRangeForm(), DateForm(), UpdateNetForm()]
 	data = {}
 	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
 		form = forms[0]
@@ -102,9 +102,17 @@ def quiz2():
 	elif request.method == 'POST' and request.form['submit'] == 'Submit_3' and forms[2].validate_on_submit():
 		form = forms[2]
 		d = form.d.data
+
 		db = DB()
 		data['columns'], data['rows'] = db.query_date(d)
+	
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_4' and forms[2].validate_on_submit():
+		form = forms[3]
+		net1 = form.net1.data
+		net2 = form.net2.data
 
+		db = DB()
+		data['columns'], data['rows'] = db.query_modify_net(net1, net2)	
 	
 	return render_template('eq.html',data=data, forms=forms, count=len(data.get('rows', [])))
 

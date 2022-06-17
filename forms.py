@@ -51,3 +51,8 @@ class NetMagRangeForm(FlaskForm):
 class DateForm(FlaskForm):
     d = DateField('date')
     submit = SubmitField('Submit_3', name='submit')
+
+class UpdateNetForm(FlaskForm):
+    net1 = StringField('net1', [validators.InputRequired()])
+    net2 = StringField('net2', [validators.InputRequired()])
+    submit = SubmitField('Submit_4', name='submit')

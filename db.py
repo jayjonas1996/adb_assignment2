@@ -90,14 +90,26 @@ class DB:
         rows2 = self._execute("""select top 1 net, count(*) as 'occurance' from quiz2 
                                 where time between DATETIMEFROMPARTS(%d, %d, %d, 0, 0, 0, 0) 
                                 and DATETIMEFROMPARTS(%d, %d, %d, 23, 59, 59, 999) group by net order by 'occurance'""",(date.year, date.month, date.day, date.year, date.month, date.day))
-        rows.append(rows2[0])
+        if len(rows2):
+            rows.append(rows2[0])
         return ['net', 'frequency'], rows
+    
+    def query_modify_net(self, net1, net2):
+        rows = self._execute("""update quiz2 set net = %s where net = %s""", (net2, net1), close=False, fetch=False)
+        row_count = self.conn.cursor().rowcount
+        print(row_count)
+        self.conn.commit()
+        
+        self.close()
+        return ['affected rows'], [[row_count]]
 
-    def _execute(self, query, data=(), close=True):
+    def _execute(self, query, data=(), close=True, fetch=True):
         try:
             cursor = self.conn.cursor()
             cursor.execute(query, data)
-            rows = cursor.fetchall()
+            rows = []
+            if fetch:
+                rows = cursor.fetchall()
         except Exception as e:
             print(e)
             rows = []
