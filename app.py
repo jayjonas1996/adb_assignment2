@@ -133,36 +133,39 @@ def cluster():
 	
 	return render_template('eq.html', data=data, forms=[form], count=len(data.get('rows', [])))
 
-
 @app.route('/a3_a', methods=['POST', 'GET'])
-def assignment3():
+def assignment3_a():
 	db = DB(auto_close=False)
-	start = timeit.default_timer()
+	time = 0
 	for i in range(1000):
 		mag = random.randint(0,9)
-		# result = r.get(str(mag))
-		# if result:
-		# 	result = list(result)
+		# if r.exists(str(mag)):
+			# result = r.get(str(mag))
 		# else:
+		start = timeit.default_timer()
 		_, result = db.query_range(mi=mag, ma=None)
-		# r.set(str(mag), '')
+		time += round(timeit.default_timer() - start, 2)
+		r.set(str(mag), '')
 	db.close()
-	return render_template('query_time.html', message=f'Executed 1000 queries in {round(timeit.default_timer() - start, 2)} seconds')
+	return render_template('query_time.html', message=f'Executed 1000 queries in {time} seconds')
 
 @app.route('/a3_b', methods=['POST', 'GET'])
-def assignment3():
+def assignment3_b():
 	db = DB(auto_close=False)
-	start = timeit.default_timer()
+	time = 0
 	for i in range(1000):
-		mag = random.randint(0,9)
-		result = r.get(str(mag))
-		if result:
-			result = list(result)
+		mag = random.randint(0, 9)
+		if r.exists(str(mag)):
+			start = timeit.default_timer()
+			result = r.get(str(mag))
+			time += round(timeit.default_timer() - start, 2)
 		else:
+			start = timeit.default_timer()
 			_, result = db.query_range(mi=mag, ma=None)
+			time += round(timeit.default_timer() - start, 2)
 			r.set(str(mag), '')
 	db.close()
-	return render_template('query_time.html', message=f'Executed 1000 queries in {round(timeit.default_timer() - start, 2)} seconds')
+	return render_template('query_time.html', message=f'Executed 1000 queries in {time} seconds')
 
 ###
 @app.route('/help')
