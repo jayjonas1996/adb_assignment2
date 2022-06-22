@@ -19,17 +19,20 @@ class DB:
 
     cols = []
     conn = None
+    auto_close = True
     
-    def __init__(self):
+    def __init__(self, auto_close=True):
+        self.auto_close = auto_close
         self.conn = pymssql.connect(server=SERVER, user=USER, password=os.environ.get('DB_PASS'), database=_DB)
         cursor = self.conn.cursor()
         cursor.execute("select COLUMN_NAME from INFORMATION_SCHEMA.columns where TABLE_NAME = 'test0';")
         self.cols = [x[0] for x in cursor.fetchall()]
 
-    def query_range(self, mi, ma, metric, offset=None):
+    def query_range(self, mi, ma, metric=None, offset=None):
+        rows = []
         datetime.today() - timedelta(weeks=1)
         today = f"{datetime.now():%Y-%m-%d %H:%M:%S}"
-        if offset:
+        if offset and metric:
             past = self.timed(metric, offset)
             rows = self._execute('SELECT * from test0 where mag BETWEEN %d AND %d AND time BETWEEN %s and %s', (mi, ma, past, today))
         elif mi and ma:
@@ -95,15 +98,15 @@ class DB:
         return ['net', 'frequency'], rows
     
     def query_modify_net(self, net1, net2):
-        rows = self._execute("""select * from quiz2 where net = %s""", (net1), close=False)
-        self._execute("""update quiz2 set net = %s where net = %s""", (net2, net1), close=False, fetch=False)
+        rows = self._execute("""select * from quiz2 where net = %s""", (net1))
+        self._execute("""update quiz2 set net = %s where net = %s""", (net2, net1), fetch=False)
         self.conn.commit()
         row_count = len(rows)
         print(row_count)
         self.close()
         return ['affected rows'], [[row_count]]
 
-    def _execute(self, query, data=(), close=True, fetch=True):
+    def _execute(self, query, data=(), fetch=True):
         try:
             cursor = self.conn.cursor()
             cursor.execute(query, data)
@@ -114,7 +117,7 @@ class DB:
             print(e)
             rows = []
         finally:
-            if close:
+            if self.auto_close:
                 self.close()
 
         return rows

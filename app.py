@@ -1,18 +1,18 @@
 '''
 Name: Jaykumar Naik
 ID: 1001865454
-Assignment: 2
+Assignment: 3
 Web url: 
 '''
-import os
-import shutil
-import sys
-from flask import Flask,render_template, url_for, flash, redirect, request
+import os, sys, timeit, random, json
+from flask import Flask, render_template, url_for, flash, redirect, request
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_bootstrap import Bootstrap
 from wtforms import StringField, IntegerField, SubmitField, SelectField
+from flask_caching import Cache
+import redis
 
 from db import DB
 from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
@@ -20,7 +20,7 @@ from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange,
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
-db = DB()
+r = redis.StrictRedis(host=os.environ['CACHE_REDIS_HOST'], password=os.environ['CACHE_REDIS_PASS'], ssl=True, db=0, decode_responses=True, port=6380)
 
 # Configurations
 app.config['SECRET_KEY'] = 'blah blah blah blah'
@@ -30,7 +30,7 @@ class NameForm(FlaskForm):
 	submit = SubmitField('Submit')
 
 # ROUTES!
-@app.route('/',methods=['GET','POST'])
+@app.route('/', methods=['GET','POST'])
 def index():
 	form = NameForm()
 	if form.validate_on_submit():
@@ -111,8 +111,9 @@ def quiz2():
 		net1 = form.net1.data
 		net2 = form.net2.data
 
-		db = DB()
-		data['columns'], data['rows'] = db.query_modify_net(net1, net2)	
+		db = DB(auto_close=False)
+		data['columns'], data['rows'] = db.query_modify_net(net1, net2)
+		db.close()
 	
 	return render_template('eq.html',data=data, forms=forms, count=len(data.get('rows', [])))
 
@@ -131,6 +132,37 @@ def cluster():
 		data['columns'], data['rows'] = db.query_cluster(lat_from, lat_to, lon_from, lon_to, interval)
 	
 	return render_template('eq.html', data=data, forms=[form], count=len(data.get('rows', [])))
+
+
+@app.route('/a3_a', methods=['POST', 'GET'])
+def assignment3():
+	db = DB(auto_close=False)
+	start = timeit.default_timer()
+	for i in range(1000):
+		mag = random.randint(0,9)
+		# result = r.get(str(mag))
+		# if result:
+		# 	result = list(result)
+		# else:
+		_, result = db.query_range(mi=mag, ma=None)
+		# r.set(str(mag), '')
+	db.close()
+	return render_template('query_time.html', message=f'Executed 1000 queries in {round(timeit.default_timer() - start, 2)} seconds')
+
+@app.route('/a3_b', methods=['POST', 'GET'])
+def assignment3():
+	db = DB(auto_close=False)
+	start = timeit.default_timer()
+	for i in range(1000):
+		mag = random.randint(0,9)
+		result = r.get(str(mag))
+		if result:
+			result = list(result)
+		else:
+			_, result = db.query_range(mi=mag, ma=None)
+			r.set(str(mag), '')
+	db.close()
+	return render_template('query_time.html', message=f'Executed 1000 queries in {round(timeit.default_timer() - start, 2)} seconds')
 
 ###
 @app.route('/help')
