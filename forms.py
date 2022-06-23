@@ -56,3 +56,25 @@ class UpdateNetForm(FlaskForm):
     net1 = StringField('net1', [validators.InputRequired()])
     net2 = StringField('net2', [validators.InputRequired()])
     submit = SubmitField('Submit_4', name='submit')
+
+class VotesYearRangeForm(FlaskForm):
+    year_min = IntegerField('year from', [validators.InputRequired()])
+    year_max = IntegerField('year to', [validators.InputRequired()])
+    votes_min = IntegerField('votes from', [validators.InputRequired()])
+    votes_max = IntegerField('votes to', [validators.InputRequired()])
+    times = IntegerField('repeat', [validators.Optional()], default=1)
+    submit = SubmitField('Submit_1', name='submit')
+
+class YearRangeForm(FlaskForm):
+    year_min = IntegerField('year from', [validators.InputRequired()])
+    year_max = IntegerField('year to', [validators.InputRequired()])
+    times = IntegerField('repeat', [validators.Optional()], default=1)
+    submit = SubmitField('Submit_2', name='submit')
+
+class YearRangeNForm(FlaskForm):
+    year_min = IntegerField('year from', [validators.InputRequired()])
+    year_max = IntegerField('year to', [validators.InputRequired()])
+    times = IntegerField('repeat', [validators.Optional()], default=1)
+    sample = IntegerField('N', [validators.InputRequired()])
+    submit = SubmitField('Submit_3', name='submit')
+

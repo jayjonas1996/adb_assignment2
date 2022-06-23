@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<style>
+    table, tr, td, th {
+        border: solid 1px black;
+        padding: 5px;
+    }
+</style>
+
+<!-- FORMS -->
+{% if forms %}
+    {% for form in forms %}
+        {{ wtf.quick_form(form) }}
+        <br/>
+    {% endfor %}
+{% endif %}
+
+<!-- TABLE MIN MAX -->
+{% if data %}
+<h3>Max Min</h3>
+<table>
+    <tr>
+        {% for column in data.columns %}
+            <th>{{ column }}</th>
+        {% endfor %}
+    </tr>
+    {% for row in data.rows2 %}
+        <tr>
+            {% for r in row %}
+                <td>{{ r }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+{% endif %}
+<br/>
+
+<!-- TABLE MAIN -->
+{% if data %}
+<h3>Count: {{ count }} rows</h3><br/>
+{% if message %}
+    <h3>{{ message }}</h3>
+{% endif %}
+<table>
+    <tr>
+        {% for column in data.columns %}
+            <th>{{ column }}</th>
+        {% endfor %}
+    </tr>
+    {% for row in data.rows %}
+        <tr>
+            {% for r in row %}
+                <td>{{ r }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+{% endblock %}

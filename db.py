@@ -16,6 +16,7 @@ class DB:
                'rms', 'net', 'id', 'updated', 'place', 'type', 'horizontalerror', 'deptherror', 
                'magerror', 'magnst', 'status', 'localsource', 'magsource']
     columns2 = ['time', 'latitude', 'longitude', 'id', 'place'] #['time', 'latitude', 'longitude', 'depth', 'mag', 'magType', 'net', 'id', 'place', 'horizontalerror', 'magerror', 'magnst', 'locationsource']
+    columns3 = ['year', 'state', 'votes', 'party']
 
     cols = []
     conn = None
@@ -105,6 +106,19 @@ class DB:
         print(row_count)
         self.close()
         return ['affected rows'], [[row_count]]
+    
+    def query_votes(self, year_from, year_to, votes_from=None, votes_to=None):
+        cols = self.columns3
+        if votes_from is not None and votes_to is not None:
+            rows = self._execute('select * from pvotes where year between %d and %d and votes between %d and %d order by votes desc', (year_from, year_to, votes_from, votes_to))
+            rows_max = self._execute('select top 1 * from pvotes where year between %d and %d and votes between %d and %d order by votes desc', (year_from, year_to, votes_from, votes_to))
+            rows_min = self._execute('select top 1 * from pvotes where year between %d and %d and votes between %d and %d order by votes', (year_from, year_to, votes_from, votes_to))
+        else:
+            rows = self._execute('select state, sum(votes), party from pvotes where year between %d and %d group by state, party order by state', (year_from, year_to))
+            rows_max = self._execute('select top 1 state, party, max(votes) as count from pvotes where year between %d and %d group by state, party order by count desc', (year_from, year_to))
+            rows_min = self._execute('select top 1 state, party, max(votes) as count from pvotes where year between %d and %d group by state, party order by count',  (year_from, year_to))
+            cols = ['state', 'votes', 'party']
+        return cols, rows, rows_max + rows_min
 
     def _execute(self, query, data=(), fetch=True):
         try:

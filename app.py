@@ -16,7 +16,7 @@ import redis
 
 from db import DB
 from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
-		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm
+		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm, VotesYearRangeForm, YearRangeForm, YearRangeNForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -166,6 +166,63 @@ def assignment3_b():
 			r.set(str(mag), '')
 	db.close()
 	return render_template('query_time.html', message=f'Executed 1000 queries in {time} seconds')
+
+@app.route('/quiz3', methods=['GET', 'POST'])
+def quiz3():
+	db = DB(auto_close=False)
+	data = dict()
+	time, times = 0, 1
+	forms = [VotesYearRangeForm(), YearRangeForm(), YearRangeNForm()]
+	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
+		form = forms[0]
+		y_min = form.year_min.data
+		y_max = form.year_max.data
+		v_min = form.votes_min.data
+		v_max = form.votes_max.data
+		times = form.times.data
+		# if r.exists():
+		# print(r.get(f'2_{y_min}_{y_max}-{v_min}_{v_max}'))
+	# else:
+		for _ in range(times):
+			start = timeit.default_timer()
+			data['columns'], data['rows'], data['rows2'] = db.query_votes(y_min, y_max, v_min, v_max)
+			time += round(timeit.default_timer() - start, 4)
+		r.set(f'2_{y_min}_{y_max}-{v_min}_{v_max}', json.dumps(data['rows']))
+		db.close()
+
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
+		form = forms[1]
+		y_min = form.year_min.data
+		y_max = form.year_max.data
+		times = form.times.data
+		# if r.exists(f'2_{y_min}_{y_max}'):
+		# print(r.get(f'2_{y_min}_{y_max}'))
+		for _ in range(times):
+			start = timeit.default_timer()
+			data['columns'], data['rows'], data['rows2'] = db.query_votes(y_min, y_max)
+			time += round(timeit.default_timer() - start, 4)
+		
+		# SET IN CACHE HERE
+		# r.set(f'2_{y_min}_{y_max}', json.dumps(data['rows']))
+		db.close()
+	
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_3' and forms[2].validate_on_submit():
+		form = forms[2]
+		y_min = form.year_min.data
+		y_max = form.year_max.data
+		times = form.times.data
+		sample = form.sample.data
+		for _ in range(times):
+			start = timeit.default_timer()
+			data['columns'], data['rows'], data['rows2'] = db.query_votes(y_min, y_max)
+			time += round(timeit.default_timer() - start, 4)
+		new_rows = []
+		for i in sorted(random.sample(range(len(data['rows'])), sample)):
+			new_rows.append(data['rows'][i])
+		data['rows'] = new_rows
+		db.close()
+
+	return render_template('votes.html', data=data, forms=forms, count=len(data.get('rows', [])), message=f'Executed {times} times in {time}s')
 
 ###
 @app.route('/help')
