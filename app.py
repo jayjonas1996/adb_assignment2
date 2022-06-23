@@ -180,30 +180,39 @@ def quiz3():
 		v_min = form.votes_min.data
 		v_max = form.votes_max.data
 		times = form.times.data
-		# if r.exists():
-		# print(r.get(f'2_{y_min}_{y_max}-{v_min}_{v_max}'))
-	# else:
-		for _ in range(times):
-			start = timeit.default_timer()
-			data['columns'], data['rows'], data['rows2'] = db.query_votes(y_min, y_max, v_min, v_max)
-			time += round(timeit.default_timer() - start, 4)
-		r.set(f'2_{y_min}_{y_max}-{v_min}_{v_max}', json.dumps(data['rows']))
-		db.close()
+		use_cache = form.use_cache.data
+		if r.exists(f'1_{y_min}_{y_max}-{v_min}_{v_max}') and use_cache:
+			data['columns'] = ['year', 'state', 'votes', 'party']
+			for _ in range(times):
+				start = timeit.default_timer()
+				data['rows'] = json.loads(r.get(f'1_{y_min}_{y_max}-{v_min}_{v_max}'))
+				time += round(timeit.default_timer() - start, 4)
+		else:
+			for _ in range(times):
+				start = timeit.default_timer()
+				data['columns'], data['rows'], data['rows2'] = db.query_votes(y_min, y_max, v_min, v_max)
+				time += round(timeit.default_timer() - start, 4)
+			r.set(f'1_{y_min}_{y_max}-{v_min}_{v_max}', json.dumps(data['rows']))
+			db.close()
 
 	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
 		form = forms[1]
 		y_min = form.year_min.data
 		y_max = form.year_max.data
 		times = form.times.data
-		# if r.exists(f'2_{y_min}_{y_max}'):
-		# print(r.get(f'2_{y_min}_{y_max}'))
-		for _ in range(times):
-			start = timeit.default_timer()
-			data['columns'], data['rows'], data['rows2'] = db.query_votes(y_min, y_max)
-			time += round(timeit.default_timer() - start, 4)
-		
-		# SET IN CACHE HERE
-		# r.set(f'2_{y_min}_{y_max}', json.dumps(data['rows']))
+		use_cache = form.use_cache.data
+		if r.exists(f'2_{y_min}_{y_max}') and use_cache:
+			data['columns'] = ['state', 'votes', 'party']
+			for _ in range(times):
+				start = timeit.default_timer()
+				data['rows'] = json.loads(r.get(f'2_{y_min}_{y_max}'))
+				time += round(timeit.default_timer() - start, 4)
+		else:
+			for _ in range(times):
+				start = timeit.default_timer()
+				data['columns'], data['rows'], data['rows2'] = db.query_votes(y_min, y_max)
+				time += round(timeit.default_timer() - start, 4)
+			r.set(f'2_{y_min}_{y_max}', json.dumps(data['rows']))
 		db.close()
 	
 	elif request.method == 'POST' and request.form['submit'] == 'Submit_3' and forms[2].validate_on_submit():
@@ -212,14 +221,25 @@ def quiz3():
 		y_max = form.year_max.data
 		times = form.times.data
 		sample = form.sample.data
-		for _ in range(times):
-			start = timeit.default_timer()
-			data['columns'], data['rows'], data['rows2'] = db.query_votes(y_min, y_max)
-			time += round(timeit.default_timer() - start, 4)
+		use_cache = form.use_cache.data
 		new_rows = []
-		for i in sorted(random.sample(range(len(data['rows'])), sample)):
-			new_rows.append(data['rows'][i])
-		data['rows'] = new_rows
+		if r.exists(f'3_{y_min}_{y_max}_{sample}') and use_cache:
+			for _ in range(times):
+				start = timeit.default_timer()
+				data['rows'] = json.loads(r.get(f'3_{y_min}_{y_max}_{sample}'))
+				time += round(timeit.default_timer() - start, 4)
+				for i in sorted(random.sample(range(len(data['rows'])), sample)):
+					new_rows.append(data['rows'][i])
+				data['rows'] = new_rows
+		else:
+			for _ in range(times):
+				start = timeit.default_timer()
+				data['columns'], data['rows'], data['rows2'] = db.query_votes(y_min, y_max)
+				time += round(timeit.default_timer() - start, 4)
+				for i in sorted(random.sample(range(len(data['rows'])), sample)):
+					new_rows.append(data['rows'][i])
+			r.set(f'3_{y_min}_{y_max}_{sample}', json.dumps(data['rows']))
+			data['rows'] = new_rows
 		db.close()
 
 	return render_template('votes.html', data=data, forms=forms, count=len(data.get('rows', [])), message=f'Executed {times} times in {time}s')

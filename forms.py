@@ -1,4 +1,4 @@
-from wtforms import StringField, IntegerField, SubmitField, FloatField, SelectField, DateField
+from wtforms import StringField, IntegerField, SubmitField, FloatField, SelectField, DateField, BooleanField
 from wtforms import validators
 from flask_wtf import FlaskForm
 
@@ -63,12 +63,14 @@ class VotesYearRangeForm(FlaskForm):
     votes_min = IntegerField('votes from', [validators.InputRequired()])
     votes_max = IntegerField('votes to', [validators.InputRequired()])
     times = IntegerField('repeat', [validators.Optional()], default=1)
+    use_cache = BooleanField('use cache', default=False)
     submit = SubmitField('Submit_1', name='submit')
 
 class YearRangeForm(FlaskForm):
     year_min = IntegerField('year from', [validators.InputRequired()])
     year_max = IntegerField('year to', [validators.InputRequired()])
     times = IntegerField('repeat', [validators.Optional()], default=1)
+    use_cache = BooleanField('use cache', default=False)
     submit = SubmitField('Submit_2', name='submit')
 
 class YearRangeNForm(FlaskForm):
@@ -76,5 +78,6 @@ class YearRangeNForm(FlaskForm):
     year_max = IntegerField('year to', [validators.InputRequired()])
     times = IntegerField('repeat', [validators.Optional()], default=1)
     sample = IntegerField('N', [validators.InputRequired()])
+    use_cache = BooleanField('use cache', default=False)
     submit = SubmitField('Submit_3', name='submit')
 
