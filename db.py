@@ -130,8 +130,12 @@ class DB:
         cols = self.columns4
         fruits = "', '".join(fruits)
         fruits = "'" + fruits + "'"
-        print(fruits)
         rows = self._execute(f'select count(*) from quiz4 where name in ({fruits}) group by name;')
+        return cols, rows
+    
+    def query_range_fruit(self, low, high):
+        cols = ['col1', 'col3']
+        rows = self._execute('select col1, col3 from quiz4 where col1 between %d and %d', (low, high))
         return cols, rows
 
     def _execute(self, query, data=(), fetch=True):

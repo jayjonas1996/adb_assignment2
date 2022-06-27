@@ -271,11 +271,12 @@ def assignment4_scatter():
 
 @app.route('/fruits', methods=['GET', 'POST'])
 def quiz4_1():
-	forms = [FruitsForm(), FruitsBarForm()]
+	forms = [FruitsForm(), FruitsBarForm(), FruitsScatterForm()]
 	data = {'columns': [], 'rows': []}
 	db = DB()
 	bar_type = ''
 	colors = []
+	extraLabels = 'false'
 	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
 		form = forms[0]
 		n = form.n.data
@@ -294,8 +295,19 @@ def quiz4_1():
 		data['rows'] = [x[0] for x in data['rows']]
 		bar_type = 'bar'
 		colors = ['rgb(0,128,0)']
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_3' and forms[2].validate_on_submit():
+		form = forms[2]
+		low = form.low.data
+		high = form.high.data
+		_, data['rows'] = db.query_range_fruit(low, high)
+		data['rows'] = [{'x': x[0], 'y': x[1]} for x in data['rows']]
+		data['label'] = { 'x': 'Col 1', 'y': 'Col 3'}
+		data['columns'] = ['col 1', 'col 3']
+		bar_type = 'scatter'
+		extraLabels = 'true'
+		colors = ['rgb(0,128,0)']
 
-	return render_template('fruits.html', colors=colors, bar_type=bar_type, forms=forms, data=data)
+	return render_template('fruits.html', extraLabels=extraLabels, colors=colors, bar_type=bar_type, forms=forms, data=data)
 
 ###
 @app.route('/help')

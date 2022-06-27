@@ -23,12 +23,8 @@
         const config = {
             type: '{{ bar_type }}',
             data: data,
-            options: { 
-                // scales: {
-                //     x: { title: { display: true, text: 'Magnitude' }}, 
-                //     y: { title: { display: true, text: 'Depth' }}
-                // }
-            }
+            options: {{ extraLabels }} ? { scales: {  x: { title: { display: true, text: '{{ data.label.x }}' }}, y: { title: { display: true, text: '{{ data.label.y }}' }} } } : {}
+            
         };
         const chart = new Chart(ctx, config);
 

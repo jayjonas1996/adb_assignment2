@@ -93,6 +93,5 @@ class FruitsBarForm(FlaskForm):
 
 class FruitsScatterForm(FlaskForm):
     low = IntegerField('Low (L)', [validators.InputRequired()])
-    lohighw = IntegerField('High (H)', [validators.InputRequired()])
-    fruits = StringField('fruits', [validators.InputRequired()])
-    submit = SubmitField('Submit_2', name='submit')
+    high = IntegerField('High (H)', [validators.InputRequired()])
+    submit = SubmitField('Submit_3', name='submit')
