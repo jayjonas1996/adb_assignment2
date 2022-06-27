@@ -1,8 +1,8 @@
 '''
 Name: Jaykumar Naik
 ID: 1001865454
-Assignment: 3
-Web url: 
+Assignment: 3 (quiz 3)
+Web url: https://jkn-adb-a2.azurewebsites.net/quiz3
 '''
 import os, sys, timeit, random, json
 from flask import Flask, render_template, url_for, flash, redirect, request
