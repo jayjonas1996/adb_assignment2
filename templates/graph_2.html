@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<style>
+    .wrapper {
+        width: calc(100vh - 400px);
+        /* height: 50vh; */
+    }
+</style>
+<script>
+    window.addEventListener('load', function(event) {
+        const ctx = document.getElementById('chart').getContext('2d');
+        const data = {
+            // labels: {{ labels | safe }},
+            datasets: [{
+                label: 'Scatter plot',
+                data: {{ data | safe }},
+                backgroundColor: 'rgb(255, 99, 132)',
+                hoverOffset: 4
+            }]
+        };
+        const config = {
+            type: 'scatter',
+            data: data,
+            options: {}
+        };
+        const myChart = new Chart(ctx, config);
+    });
+
+</script>
+
+<!-- {% if data %} -->
+<div class="wrapper">
+    <canvas id="chart"></canvas>
+</div>
+<!-- {% endif %} -->
+
+{% endblock %}

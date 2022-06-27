@@ -5,6 +5,7 @@ Assignment: 3 (quiz 3)
 Web url: https://jkn-adb-a2.azurewebsites.net/quiz3
 '''
 import os, sys, timeit, random, json
+from collections import Counter
 from flask import Flask, render_template, url_for, flash, redirect, request
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
@@ -243,6 +244,30 @@ def quiz3():
 		db.close()
 
 	return render_template('votes.html', data=data, forms=forms, count=len(data.get('rows', [])), message=f'Executed {times} times in {time}s')
+
+@app.route('/graph', methods=['GET', 'POST'])
+def assignment4():
+	db = DB()
+	data = db.short_query('''select case 
+    when mag between 0 and 1 then '<1' 
+    when mag between 1 and 2 then '1-2'
+    when mag between 2 and 3 then '2-3'
+    when mag between 3 and 4 then '3-4'
+    when mag between 4 and 5 then '4-5'
+	else 'else' end as 'magcat' from test0 where 'magcat' != 'else';''')
+	data = Counter([x[0] for x in data])
+	labels = [x[0] for x in data.items()][:-1]
+	data   = [x[1] for x in data.items()][:-1]
+	return render_template('graph.html', labels=labels, data=data)
+
+@app.route('/graph_scatter', methods=['GET', 'POST'])
+def assignment4_scatter():
+	db = DB()
+	data = db.short_query('''select mag, depth from test0 where DATEPART(year, time) = %d;''', 2022)
+	data = [{'x': x[0], 'y': x[1]} for x in data]
+	print(data)
+	return render_template('graph_2.html', data=data)
+
 
 ###
 @app.route('/help')

@@ -28,6 +28,11 @@ class DB:
         cursor = self.conn.cursor()
         cursor.execute("select COLUMN_NAME from INFORMATION_SCHEMA.columns where TABLE_NAME = 'test0';")
         self.cols = [x[0] for x in cursor.fetchall()]
+    
+    def short_query(self, text, param=None):
+        if param:
+           return self._execute(text, param) 
+        return self._execute(text)
 
     def query_range(self, mi, ma, metric=None, offset=None):
         rows = []
