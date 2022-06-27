@@ -22,7 +22,11 @@
         const config = {
             type: 'scatter',
             data: data,
-            options: {}
+            options: { scales: {
+                x: { title: { display: true, text: 'Magnitude' }}, 
+                y: { title: { display: true, text: 'Depth' }}
+            }
+        }
         };
         const myChart = new Chart(ctx, config);
     });

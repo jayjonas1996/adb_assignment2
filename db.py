@@ -17,6 +17,7 @@ class DB:
                'magerror', 'magnst', 'status', 'localsource', 'magsource']
     columns2 = ['time', 'latitude', 'longitude', 'id', 'place'] #['time', 'latitude', 'longitude', 'depth', 'mag', 'magType', 'net', 'id', 'place', 'horizontalerror', 'magerror', 'magnst', 'locationsource']
     columns3 = ['year', 'state', 'votes', 'party']
+    columns4 = ['col1', 'col2', 'col3', 'fruits']
 
     cols = []
     conn = None
@@ -124,6 +125,14 @@ class DB:
             rows_min = self._execute('select top 1 state, party, max(votes) as count from pvotes where year between %d and %d group by state, party order by count',  (year_from, year_to))
             cols = ['state', 'votes', 'party']
         return cols, rows, rows_max + rows_min
+    
+    def query_n_fruits(self, fruits):
+        cols = self.columns4
+        fruits = "', '".join(fruits)
+        fruits = "'" + fruits + "'"
+        print(fruits)
+        rows = self._execute(f'select count(*) from quiz4 where name in ({fruits}) group by name;')
+        return cols, rows
 
     def _execute(self, query, data=(), fetch=True):
         try:

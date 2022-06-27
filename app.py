@@ -17,7 +17,8 @@ import redis
 
 from db import DB
 from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
-		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm, VotesYearRangeForm, YearRangeForm, YearRangeNForm
+		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm, VotesYearRangeForm, YearRangeForm, YearRangeNForm, \
+			FruitsForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -268,6 +269,21 @@ def assignment4_scatter():
 	print(data)
 	return render_template('graph_2.html', data=data)
 
+@app.route('/fruits', methods=['GET', 'POST'])
+def quiz4_1():
+	forms = [FruitsForm()]
+	data = {'columns': [], 'rows': []}
+	db = DB()
+	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
+		form = forms[0]
+		n = form.n.data
+		fruits = form.fruits.data.split(',')
+		_, data['rows'] = db.query_n_fruits(fruits)
+		data['columns'] = fruits
+		data['rows'] = [x[0] for x in data['rows']]
+		print(data)
+
+	return render_template('fruits.html', forms=forms, data=data)
 
 ###
 @app.route('/help')

@@ -9,12 +9,13 @@
 </style>
 <script>
     window.addEventListener('load', function(event) {
+        // if not ({{ data }}) { return; }
         const ctx = document.getElementById('chart').getContext('2d');
         const data = {
-            labels: {{ labels | safe }},
+            labels: {{ data.columns | safe }},
             datasets: [{
-                label: 'My First Dataset',
-                data: {{ data | safe }},
+                label: '',
+                data: {{ data.rows | safe }},
                 backgroundColor: [
                     'rgb(255, 99, 132)',
                     'rgb(54, 162, 235)',
@@ -24,20 +25,32 @@
             }]
         };
         const config = {
-            type: 'bar',
+            type: 'pie',
             data: data,
-            options: { scales: {
-                x: { title: { display: true, text: 'Magnitude' }}, 
-                y: { title: { display: true, text: 'Depth' }}
+            options: { 
+                // scales: {
+                //     x: { title: { display: true, text: 'Magnitude' }}, 
+                //     y: { title: { display: true, text: 'Depth' }}
+                // }
             }
-        }
-    };
+        };
         const chart = new Chart(ctx, config);
-        chart.options.scales.yAxes[0].scaleLabel.labelString = "Depth";
-        chart.options.scales.xAxes[0].scaleLabel.labelString = "Magnitude";
+
     });
 
 </script>
+
+
+{% if message %}
+    <h3>{{ message }}</h3>
+{% endif %}
+
+{% if forms %}
+    {% for form in forms %}
+        {{ wtf.quick_form(form) }}
+        <br/>
+    {% endfor %}
+{% endif %}
 
 <!-- {% if data %} -->
 <div class="wrapper">

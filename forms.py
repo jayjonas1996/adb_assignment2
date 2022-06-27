@@ -81,3 +81,7 @@ class YearRangeNForm(FlaskForm):
     use_cache = BooleanField('use cache', default=False)
     submit = SubmitField('Submit_3', name='submit')
 
+class FruitsForm(FlaskForm):
+    n = IntegerField('N', [validators.InputRequired()])
+    fruits = StringField('fruits', [validators.InputRequired()])
+    submit = SubmitField('Submit_1', name='submit')
