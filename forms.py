@@ -85,3 +85,14 @@ class FruitsForm(FlaskForm):
     n = IntegerField('N', [validators.InputRequired()])
     fruits = StringField('fruits', [validators.InputRequired()])
     submit = SubmitField('Submit_1', name='submit')
+
+class FruitsBarForm(FlaskForm):
+    n = IntegerField('N', [validators.InputRequired()])
+    fruits = StringField('fruits', [validators.InputRequired()])
+    submit = SubmitField('Submit_2', name='submit')
+
+class FruitsScatterForm(FlaskForm):
+    low = IntegerField('Low (L)', [validators.InputRequired()])
+    lohighw = IntegerField('High (H)', [validators.InputRequired()])
+    fruits = StringField('fruits', [validators.InputRequired()])
+    submit = SubmitField('Submit_2', name='submit')

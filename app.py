@@ -18,7 +18,7 @@ import redis
 from db import DB
 from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
 		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm, VotesYearRangeForm, YearRangeForm, YearRangeNForm, \
-			FruitsForm
+			FruitsForm, FruitsBarForm, FruitsScatterForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -271,9 +271,11 @@ def assignment4_scatter():
 
 @app.route('/fruits', methods=['GET', 'POST'])
 def quiz4_1():
-	forms = [FruitsForm()]
+	forms = [FruitsForm(), FruitsBarForm()]
 	data = {'columns': [], 'rows': []}
 	db = DB()
+	bar_type = ''
+	colors = []
 	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
 		form = forms[0]
 		n = form.n.data
@@ -281,9 +283,19 @@ def quiz4_1():
 		_, data['rows'] = db.query_n_fruits(fruits)
 		data['columns'] = fruits
 		data['rows'] = [x[0] for x in data['rows']]
-		print(data)
+		bar_type = 'pie'
+		colors = ['rgb(255, 99, 132)', 'rgb(54, 162, 235)', 'rgb(255, 205, 86)']
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
+		form = forms[1]
+		n = form.n.data
+		fruits = form.fruits.data.split(',')
+		_, data['rows'] = db.query_n_fruits(fruits)
+		data['columns'] = fruits
+		data['rows'] = [x[0] for x in data['rows']]
+		bar_type = 'bar'
+		colors = ['rgb(0,128,0)']
 
-	return render_template('fruits.html', forms=forms, data=data)
+	return render_template('fruits.html', colors=colors, bar_type=bar_type, forms=forms, data=data)
 
 ###
 @app.route('/help')
