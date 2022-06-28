@@ -300,8 +300,8 @@ def quiz4_1():
 		low = form.low.data
 		high = form.high.data
 		_, data['rows'] = db.query_range_fruit(low, high)
-		data['rows'] = [{'x': x[1], 'y': x[0]} for x in data['rows']]
-		data['label'] = { 'x': 'Col 3', 'y': 'Col 1'}
+		data['rows'] = [{'x': x[0], 'y': x[1]} for x in data['rows']]
+		data['label'] = { 'x': 'Col 1', 'y': 'Col 3'}
 		data['columns'] = ['col 1', 'col 3']
 		bar_type = 'scatter'
 		extraLabels = True

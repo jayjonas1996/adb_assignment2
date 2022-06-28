@@ -9,7 +9,6 @@
 </style>
 <script>
     window.addEventListener('load', function(event) {
-        // if not ({{ data }}) { return; }
         const ctx = document.getElementById('chart').getContext('2d');
         const data = {
             labels: {{ data.columns | safe }},
