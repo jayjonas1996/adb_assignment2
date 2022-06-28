@@ -289,10 +289,10 @@ def quiz4_1():
 	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
 		form = forms[1]
 		n = form.n.data
-		fruits = form.fruits.data.split(',')
-		_, data['rows'] = db.query_n_fruits(fruits)
-		data['columns'] = fruits
-		data['rows'] = [x[0] for x in data['rows']]
+		_, data['rows'] = db.query_bar_fruits(n)
+		data['columns'] = [x[0] for x in data['rows']]
+		data['rows'] = [x[1] for x in data['rows']]
+		print(data)
 		bar_type = 'bar'
 		colors = ['rgb(0,128,0)']
 	elif request.method == 'POST' and request.form['submit'] == 'Submit_3' and forms[2].validate_on_submit():

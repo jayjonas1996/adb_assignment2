@@ -133,6 +133,11 @@ class DB:
         rows = self._execute(f'select count(*) from quiz4 where name in ({fruits}) group by name;')
         return cols, rows
     
+    def query_bar_fruits(self, n):
+        cols = self.columns4
+        rows = self._execute("select top %d name, count(*) as 'count' from quiz4 group by name order by 'count' desc", (n))
+        return cols, rows
+    
     def query_range_fruit(self, low, high):
         cols = ['col1', 'col3']
         rows = self._execute('select col1, col3 from quiz4 where col1 between %d and %d', (low, high))

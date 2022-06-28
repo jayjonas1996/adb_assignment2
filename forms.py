@@ -88,7 +88,6 @@ class FruitsForm(FlaskForm):
 
 class FruitsBarForm(FlaskForm):
     n = IntegerField('N', [validators.InputRequired()])
-    fruits = StringField('fruits', [validators.InputRequired()])
     submit = SubmitField('Submit_2', name='submit')
 
 class FruitsScatterForm(FlaskForm):
