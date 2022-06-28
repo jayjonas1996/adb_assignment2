@@ -23,8 +23,11 @@
         const config = {
             type: '{{ bar_type }}',
             data: data,
-            options: {{ extraLabels }} ? { scales: {  x: { title: { display: true, text: '{{ data.label.x }}' }}, y: { title: { display: true, text: '{{ data.label.y }}' }} } } : {}
-            
+            options: {% if extraLabels %} 
+                { scales: {  x: { title: { display: true, text: '{{ data.label.x }}' }}, y: { title: { display: true, text: '{{ data.label.y }}' }} } } 
+            {% else %}
+                {}
+            {% endif %}
         };
         const chart = new Chart(ctx, config);
 

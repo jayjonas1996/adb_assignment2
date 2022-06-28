@@ -272,11 +272,11 @@ def assignment4_scatter():
 @app.route('/fruits', methods=['GET', 'POST'])
 def quiz4_1():
 	forms = [FruitsForm(), FruitsBarForm(), FruitsScatterForm()]
-	data = {'columns': [], 'rows': []}
+	data = {'columns': [], 'rows': [], 'label': { 'x': 'Col 1', 'y': 'Col 3'}}
 	db = DB()
 	bar_type = ''
 	colors = []
-	extraLabels = 'false'
+	extraLabels = False
 	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
 		form = forms[0]
 		n = form.n.data
@@ -304,7 +304,7 @@ def quiz4_1():
 		data['label'] = { 'x': 'Col 1', 'y': 'Col 3'}
 		data['columns'] = ['col 1', 'col 3']
 		bar_type = 'scatter'
-		extraLabels = 'true'
+		extraLabels = True
 		colors = ['rgb(0,128,0)']
 
 	return render_template('fruits.html', extraLabels=extraLabels, colors=colors, bar_type=bar_type, forms=forms, data=data)
