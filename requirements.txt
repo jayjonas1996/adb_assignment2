@@ -15,7 +15,7 @@ werkzeug==0.16.1
 pandas==1.3.5
 python-dotenv==0.20.0
 
-# azure-storage-blob==12.12.0
+azure-storage-blob==12.12.0
 
 #Pin
 markupsafe==2.0.1

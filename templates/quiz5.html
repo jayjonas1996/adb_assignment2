@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<style>
+    table, tr, td, th {
+        border: solid 1px black;
+        padding: 3px;
+    }
+</style>
+
+{% if forms %}
+    {% for form in forms %}
+        {{ wtf.quick_form(form) }}
+        <br/>
+    {% endfor %}
+{% endif %}
+
+
+
+{% if data %}
+<table>
+    <tr>
+        {% for column in data.columns %}
+            <th>{{ column }}</th>
+        {% endfor %}
+    </tr>
+    {% for row in data.rows %}
+        <tr>
+            {% for r in row %}
+                <td>{{ r }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+
+
+
+{% endblock %}

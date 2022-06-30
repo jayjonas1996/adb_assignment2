@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+
+{% if forms %}
+    {% for form in forms %}
+        {{ wtf.quick_form(form) }}
+        <br/>
+    {% endfor %}
+{% endif %}
+
+{% endblock %}

@@ -1,4 +1,4 @@
-from wtforms import StringField, IntegerField, SubmitField, FloatField, SelectField, DateField, BooleanField
+from wtforms import StringField, IntegerField, SubmitField, FloatField, SelectField, DateField, BooleanField, FileField
 from wtforms import validators
 from flask_wtf import FlaskForm
 
@@ -94,3 +94,8 @@ class FruitsScatterForm(FlaskForm):
     low = IntegerField('Low (L)', [validators.InputRequired()])
     high = IntegerField('High (H)', [validators.InputRequired()])
     submit = SubmitField('Submit_3', name='submit')
+
+class TextFileUpload(FlaskForm):
+    f = FileField('Text file', [validators.InputRequired()])
+    n = IntegerField('N', [validators.InputRequired()])
+    submit = SubmitField('Submit_1', name='submit')

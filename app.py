@@ -4,21 +4,25 @@ ID: 1001865454
 Assignment: 3 (quiz 3)
 Web url: https://jkn-adb-a2.azurewebsites.net/quiz3
 '''
-import os, sys, timeit, random, json
+import os, sys, timeit, random, json, urllib, re, string
 from collections import Counter
 from flask import Flask, render_template, url_for, flash, redirect, request
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
 from flask_bootstrap import Bootstrap
-from wtforms import StringField, IntegerField, SubmitField, SelectField
+from wtforms import StringField, SubmitField
 from flask_caching import Cache
+from werkzeug import secure_filename
+
 import redis
+from azure.storage.blob import BlobServiceClient
 
 from db import DB
+from storage import CloudStorage, NLP
 from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
 		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm, VotesYearRangeForm, YearRangeForm, YearRangeNForm, \
-			FruitsForm, FruitsBarForm, FruitsScatterForm
+			FruitsForm, FruitsBarForm, FruitsScatterForm, TextFileUpload
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -309,6 +313,49 @@ def quiz4_1():
 
 	return render_template('fruits.html', extraLabels=extraLabels, colors=colors, bar_type=bar_type, forms=forms, data=data)
 
+@app.route('/assignment5', methods=['GET', 'POST'])
+def assignment5():
+	forms = [TextFileUpload()]
+	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
+		cs = CloudStorage()
+		form = forms[0]
+		f = form.f.data
+
+		for i in cs.list_b():
+			cs.upload(f, f.filename)		
+			with urllib.request.urlopen(CloudStorage.container + i['name']) as data:
+				nlp = NLP()
+				text = nlp.process(data)
+				print(text)
+
+	return render_template('text.html', forms=forms)
+
+@app.route('/quiz5', methods=['GET', 'POST'])
+def quizt5():
+	data = {}
+	forms = [TextFileUpload()]
+	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
+		cs = CloudStorage()
+		form = forms[0]
+		f = form.f.data
+		n = form.n.data
+		cs.upload(f, f.filename)
+
+		for i in cs.list_b():	
+			with urllib.request.urlopen(CloudStorage.container + i['name']) as text_file:
+				nlp = NLP()
+				text = nlp.process_quiz5(text_file)
+				d = Counter(text.split())
+				data['columns'] = ['words', 'count']
+				counts = []
+				for k, v in d.items():
+					counts.append((k, v))
+				counts = sorted(counts, key=lambda x: x[1], reverse=True)
+				data['rows'] = []
+				for i in range(n):
+					data['rows'].append([counts[i][0], counts[i][1]])
+	
+	return render_template('quiz5.html', forms=forms, data=data)
 ###
 @app.route('/help')
 def help():
