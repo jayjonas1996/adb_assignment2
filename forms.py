@@ -99,3 +99,9 @@ class TextFileUpload(FlaskForm):
     f = FileField('Text file', [validators.InputRequired()])
     n = IntegerField('N', [validators.InputRequired()])
     submit = SubmitField('Submit_1', name='submit')
+
+class TextReplaceForm(FlaskForm):
+    f = FileField('Text file', [validators.InputRequired()])
+    find = StringField('find', [validators.InputRequired()])
+    replace = StringField('replace', [validators.InputRequired()])
+    submit = SubmitField('Submit_2', name='submit')

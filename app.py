@@ -16,17 +16,19 @@ from flask_caching import Cache
 from werkzeug import secure_filename
 
 import redis
+import nltk
 from azure.storage.blob import BlobServiceClient
 
 from db import DB
 from storage import CloudStorage, NLP
 from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
 		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm, VotesYearRangeForm, YearRangeForm, YearRangeNForm, \
-			FruitsForm, FruitsBarForm, FruitsScatterForm, TextFileUpload
+			FruitsForm, FruitsBarForm, FruitsScatterForm, TextFileUpload, TextReplaceForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 r = redis.StrictRedis(host=os.environ['CACHE_REDIS_HOST'], password=os.environ['CACHE_REDIS_PASS'], ssl=True, db=0, decode_responses=True, port=6380)
+nltk.download('punkt')
 
 # Configurations
 app.config['SECRET_KEY'] = 'blah blah blah blah'
@@ -332,8 +334,9 @@ def assignment5():
 
 @app.route('/quiz5', methods=['GET', 'POST'])
 def quizt5():
-	data = {}
-	forms = [TextFileUpload()]
+	data_1 = {}
+	data_2 = {}
+	forms = [TextFileUpload(), TextReplaceForm()]
 	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
 		cs = CloudStorage()
 		form = forms[0]
@@ -345,17 +348,53 @@ def quizt5():
 			with urllib.request.urlopen(CloudStorage.container + i['name']) as text_file:
 				nlp = NLP()
 				text = nlp.process_quiz5(text_file)
+				data_1['rows'] = []
+				data_2['rows'] = []
+
+				data_1['columns'] = ['words', 'count']
 				d = Counter(text.split())
-				data['columns'] = ['words', 'count']
 				counts = []
 				for k, v in d.items():
 					counts.append((k, v))
 				counts = sorted(counts, key=lambda x: x[1], reverse=True)
-				data['rows'] = []
 				for i in range(n):
-					data['rows'].append([counts[i][0], counts[i][1]])
+					data_1['rows'].append([counts[i][0], counts[i][1]])
+				
+				data_2['columns'] = ['bigrams', 'count']
+				d_2 = Counter([text[idx : idx + 2] for idx in range(len(text) - 1)])
+				counts_2 = []
+				for k, v in d_2.items():
+					if ' ' not in k and len(k.strip()) == 2:
+						print(k, v)
+						counts_2.append((k, v))
+				counts_2 = sorted(counts_2, key=lambda x: x[1], reverse=True)
+				for i in range(n):
+					data_2['rows'].append([counts_2[i][0], counts_2[i][1]])
+
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
+		cs = CloudStorage()
+		form = forms[1]
+		f = form.f.data
+		find = form.find.data
+		replace = form.replace.data
+		cs.upload(f, f.filename)
+
+		for i in cs.list_b():	
+			with urllib.request.urlopen(CloudStorage.container + i['name']) as text_file:
+				nlp = NLP()	
+				i = 0
+				data_1['columns'] = ['line']
+				data_1['rows'] = []
+				for text in nlp.process_quiz5_12(text_file):
+					if text.strip():
+						print(re.sub(find, replace, text))
+						data_1['rows'].append([re.sub(find, replace, text)])
+						i += 1
+					if i >= 5:
+						break
+
 	
-	return render_template('quiz5.html', forms=forms, data=data)
+	return render_template('quiz5.html', forms=forms, data_1=data_1, data_2=data_2)
 ###
 @app.route('/help')
 def help():

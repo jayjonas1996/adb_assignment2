@@ -17,14 +17,33 @@
 
 
 
-{% if data %}
+{% if data_1 %}
 <table>
     <tr>
-        {% for column in data.columns %}
+        {% for column in data_1.columns %}
             <th>{{ column }}</th>
         {% endfor %}
     </tr>
-    {% for row in data.rows %}
+    {% for row in data_1.rows %}
+        <tr>
+            {% for r in row %}
+                <td>{{ r }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+<br/><br/>
+
+{% if data_2 %}
+<table>
+    <tr>
+        {% for column in data_2.columns %}
+            <th>{{ column }}</th>
+        {% endfor %}
+    </tr>
+    {% for row in data_2.rows %}
         <tr>
             {% for r in row %}
                 <td>{{ r }}</td>

@@ -22,3 +22,4 @@ markupsafe==2.0.1
 pymssql==2.2.5
 Flask-Caching==1.11.1
 redis==4.3.3
+nltk==3.7

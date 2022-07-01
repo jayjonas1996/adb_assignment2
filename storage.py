@@ -63,3 +63,21 @@ class NLP():
 
         text = re.sub(r'( ' + r' | '.join(sw) + r' )', ' ', text)
         return text
+    
+    def process_quiz5_12(self, data):
+        sw = []
+        with open(os.getcwd() + '/files/spanish_stopwords.csv', 'r') as f:
+            for i in f.readlines():
+                if i:
+                    sw.append(i[:-1])
+
+        for text in data.readlines():
+            text = text.decode()
+            text = re.sub(r'[^\w\s]', '', text)
+            text = re.sub(r'( ' + r' | '.join(sw) + r' )', ' ', text)
+            yield text
+
+
+       
+        
+
