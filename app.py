@@ -23,7 +23,7 @@ from db import DB
 from storage import CloudStorage, NLP
 from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
 		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm, VotesYearRangeForm, YearRangeForm, YearRangeNForm, \
-			FruitsForm, FruitsBarForm, FruitsScatterForm, TextFileUpload, TextReplaceForm
+			FruitsForm, FruitsBarForm, FruitsScatterForm, TextFileUpload, TextReplaceForm, CountStopwordsForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -336,7 +336,7 @@ def assignment5():
 def quizt5():
 	data_1 = {}
 	data_2 = {}
-	forms = [TextFileUpload(), TextReplaceForm()]
+	forms = [TextFileUpload(), TextReplaceForm(), CountStopwordsForm()]
 	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
 		cs = CloudStorage()
 		form = forms[0]
@@ -387,11 +387,32 @@ def quizt5():
 				data_1['rows'] = []
 				for text in nlp.process_quiz5_12(text_file):
 					if text.strip():
-						print(re.sub(find, replace, text))
+						# print(re.sub(find, replace, text))
 						data_1['rows'].append([re.sub(find, replace, text)])
 						i += 1
 					if i >= 5:
 						break
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_3' and forms[2].validate_on_submit():
+		cs = CloudStorage()
+		form = forms[2]
+		nlp = NLP()
+		sw = nlp.stopwords()
+		print(sw)
+		data_1['rows'] = []
+
+		for i in cs.list_b():	
+			with urllib.request.urlopen(CloudStorage.container + i['name']) as text_file:
+				data_1['columns'] = ['Stop words', 'count']
+				text = nlp.process_quiz5(text_file, stopwords=False)
+				d = Counter(text.split())
+				counts = []
+				for k, v in d.items():
+					counts.append((k, v))
+				counts = sorted(counts, key=lambda x: x[1], reverse=True)
+				for k,v in counts:
+					print(k, k in sw)
+					if k in sw:
+						data_1['rows'].append([k, v])
 
 	
 	return render_template('quiz5.html', forms=forms, data_1=data_1, data_2=data_2)

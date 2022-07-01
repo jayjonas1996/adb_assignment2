@@ -105,3 +105,6 @@ class TextReplaceForm(FlaskForm):
     find = StringField('find', [validators.InputRequired()])
     replace = StringField('replace', [validators.InputRequired()])
     submit = SubmitField('Submit_2', name='submit')
+
+class CountStopwordsForm(FlaskForm):
+    submit = SubmitField('Submit_3', name='submit')

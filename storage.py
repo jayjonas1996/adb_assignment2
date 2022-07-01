@@ -51,7 +51,7 @@ class NLP():
         text = re.sub(r'( ' + r' | '.join(a) + r' )', ' ', text)
         return text
     
-    def process_quiz5(self, data):
+    def process_quiz5(self, data, stopwords=True):
         text = data.read().lower().decode()
         text = re.sub(r'[^\w\s]', '', text)
         
@@ -61,7 +61,8 @@ class NLP():
                 if i:
                     sw.append(i[:-1])
 
-        text = re.sub(r'( ' + r' | '.join(sw) + r' )', ' ', text)
+        if stopwords:
+            text = re.sub(r'( ' + r' | '.join(sw) + r' )', ' ', text)
         return text
     
     def process_quiz5_12(self, data):
@@ -76,6 +77,14 @@ class NLP():
             text = re.sub(r'[^\w\s]', '', text)
             text = re.sub(r'( ' + r' | '.join(sw) + r' )', ' ', text)
             yield text
+
+    def stopwords(self):
+        sw = []
+        with open(os.getcwd() + '/files/spanish_stopwords.csv', 'r') as f:
+            for i in f.readlines():
+                if i:
+                    sw.append(i[:-1])
+        return sw
 
 
        
