@@ -397,7 +397,6 @@ def quizt5():
 		form = forms[2]
 		nlp = NLP()
 		sw = nlp.stopwords()
-		print(sw)
 		data_1['rows'] = []
 
 		for i in cs.list_b():	
@@ -410,7 +409,6 @@ def quizt5():
 					counts.append((k, v))
 				counts = sorted(counts, key=lambda x: x[1], reverse=True)
 				for k,v in counts:
-					print(k, k in sw)
 					if k in sw:
 						data_1['rows'].append([k, v])
 
