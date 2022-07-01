@@ -348,24 +348,24 @@ def quizt5():
 			with urllib.request.urlopen(CloudStorage.container + i['name']) as text_file:
 				nlp = NLP()
 				text = nlp.process_quiz5(text_file)
+				all_count = len(text.split())
 				data_1['rows'] = []
 				data_2['rows'] = []
 
-				data_1['columns'] = ['words', 'count']
+				data_1['columns'] = ['words', 'count', '%']
 				d = Counter(text.split())
 				counts = []
 				for k, v in d.items():
 					counts.append((k, v))
 				counts = sorted(counts, key=lambda x: x[1], reverse=True)
 				for i in range(n):
-					data_1['rows'].append([counts[i][0], counts[i][1]])
+					data_1['rows'].append([counts[i][0], counts[i][1], (counts[i][1] / all_count) * 100])
 				
 				data_2['columns'] = ['bigrams', 'count']
 				d_2 = Counter([text[idx : idx + 2] for idx in range(len(text) - 1)])
 				counts_2 = []
 				for k, v in d_2.items():
 					if ' ' not in k and len(k.strip()) == 2:
-						print(k, v)
 						counts_2.append((k, v))
 				counts_2 = sorted(counts_2, key=lambda x: x[1], reverse=True)
 				for i in range(n):
