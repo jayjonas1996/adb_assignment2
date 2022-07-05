@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<script>
+    const socket = io();
+    socket.connect('"http://127.0.0.1:3000"');
+    const sessionID = socket.socket.sessionid;
+
+socket.on('connect', function ()  {
+    socket.send('hello');
+});
+
+</script>
+
+
+
+
+
+{% endblock %}

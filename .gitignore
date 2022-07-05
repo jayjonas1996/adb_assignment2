@@ -4,4 +4,3 @@ static/
 .env
 .vscode
 __pycache__/
-files/*

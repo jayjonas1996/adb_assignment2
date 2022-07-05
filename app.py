@@ -18,6 +18,7 @@ from werkzeug import secure_filename
 import redis
 import nltk
 from azure.storage.blob import BlobServiceClient
+from flask_socketio import SocketIO
 
 from db import DB
 from storage import CloudStorage, NLP
@@ -27,6 +28,8 @@ from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange,
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
+socketio = SocketIO(app, cors_allowed_origins=["https://3000-jayjonas199-adbassignme-4lbv9t5nkbi.ws-us51.gitpod.io"])
+
 r = redis.StrictRedis(host=os.environ['CACHE_REDIS_HOST'], password=os.environ['CACHE_REDIS_PASS'], ssl=True, db=0, decode_responses=True, port=6380)
 nltk.download('punkt')
 
@@ -415,6 +418,11 @@ def quizt5():
 	
 	return render_template('quiz5.html', forms=forms, data_1=data_1, data_2=data_2)
 ###
+
+@app.route('/a7', methods=['GET', 'POST'])
+def quiz7():
+	return render_template('assignment_7.html')
+
 @app.route('/help')
 def help():
 	text_list = []
@@ -449,6 +457,21 @@ def page_not_found(error):
 def requests_error(error):
 	return render_template('500.html',title='500')
 
+
+@socketio.on('message')
+def handle_message(data):
+    print('received message: ' + data)
+
+@socketio.on('teacher_create_room') # init
+def teacher_create_room(data):
+	print(data)
+
+
+
+
+
 if os.environ.get('ENV') == 'local':
 	port = int(os.getenv('PORT', '3000'))
-	app.run(host='0.0.0.0', port=port, debug=True)
+	r.set
+	socketio.run(app, host='0.0.0.0', port=port, debug=True)
+	# app.run(host='0.0.0.0', port=port, debug=True)
