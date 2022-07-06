@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+
+
+<script>
+    let timer;
+    const socket = io();
+    socket.connect('"http://127.0.0.1:3000"');
+
+
+    socket.on('connect', function ()  {
+        let urlparam = new URLSearchParams(window.location.search);
+        socket.emit('req_data', { 'room_id': urlparam.get('id'), 'requestor': 'admin'});
+    });
+
+    socket.on('admin', (data) => {
+        if ('question' in data && data['question']) {
+            let div = "<br/>Questions and Answers: <br>";
+            let i = 0;
+            data['question'].forEach((question) => {
+                div += "<span>Q: " + question['q'] + "</span><br/>" + "<span>A: " + question['a'] + "</span><br/>" + "<span>Grade: " + data['score'][i] + "</span><br/><br/>";
+                i++;
+            });
+            document.getElementById('q_a').innerHTML = div;
+        }
+        if ('score' in data && data['score']) {
+            let sum = data['score'].reduce(function(a, b){return a+b}, 0);
+            document.getElementById('score').innerHTML = "Total score: " + sum + ", Avg Score: " + (sum / data['score'].length);
+        }
+        if ('t_name' in data && data['t_name']) {
+            document.getElementById('t_name').innerHTML = "Teacher name: " + data['t_name']
+        }
+
+        if ('s_name' in data && data['s_name']) {
+            document.getElementById('s_name').innerHTML = "Student name: " + data['s_name']
+        }
+
+        if ('time_started' in data && data['time_started']) {
+                if (timer) {
+                    clearInterval(timer);
+                }
+                timer = window.setInterval( () => {
+                    let elapsed = Math.floor(new Date() / 1000) - data['time_started'];
+                    document.getElementById("time").innerHTML = "The elapsed time is " + elapsed + " seconds. ";
+                });
+        }
+    });
+
+</script>
+
+<div id="time"></div>
+<div id='t_name'></div>
+<div id='s_name'></div>
+<div id="score"></div>
+
+<div id="message"></div>
+
+<div id="q_a"></div>
+
+{% if rooms %}
+    {% for room in rooms %}
+        <a href="/a7_admin?id={{ room }}">{{ room }}</a><br/>
+    {% endfor %}
+{% endif %}
+
+{% if form %}
+    {{ wtf.quick_form(form) }}
+{% endif %}
+
+{{ wtf.quick_form(end_form) }}
+
+
+{% endblock %}

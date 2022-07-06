@@ -4,7 +4,8 @@ ID: 1001865454
 Assignment: 3 (quiz 3)
 Web url: https://jkn-adb-a2.azurewebsites.net/quiz3
 '''
-import os, sys, timeit, random, json, urllib, re, string
+import os, sys, timeit, random, json, urllib, re, string, time
+from socket import socket
 from collections import Counter
 from flask import Flask, render_template, url_for, flash, redirect, request
 from flask_wtf import FlaskForm
@@ -15,30 +16,35 @@ from wtforms import StringField, SubmitField
 from flask_caching import Cache
 from werkzeug import secure_filename
 
+from dotenv import load_dotenv
 import redis
 import nltk
 from azure.storage.blob import BlobServiceClient
 from flask_socketio import SocketIO
+from utils import append_room_id, list_rooms, r_set, r_get
 
 from db import DB
 from storage import CloudStorage, NLP
 from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
 		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm, VotesYearRangeForm, YearRangeForm, YearRangeNForm, \
-			FruitsForm, FruitsBarForm, FruitsScatterForm, TextFileUpload, TextReplaceForm, CountStopwordsForm
+			FruitsForm, FruitsBarForm, FruitsScatterForm, TextFileUpload, TextReplaceForm, CountStopwordsForm, \
+				NameForm, QuestionForm, AnswerForm, GradeForm, HintForm, EndGameForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
-socketio = SocketIO(app, cors_allowed_origins=["https://3000-jayjonas199-adbassignme-4lbv9t5nkbi.ws-us51.gitpod.io"])
+load_dotenv('.env')
+socketio = SocketIO(app, cors_allowed_origins=["https://3000-jayjonas199-adbassignme-4lbv9t5nkbi.ws-us51.gitpod.io", 
+"http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:5000"])
 
-r = redis.StrictRedis(host=os.environ['CACHE_REDIS_HOST'], password=os.environ['CACHE_REDIS_PASS'], ssl=True, db=0, decode_responses=True, port=6380)
+r = redis.StrictRedis(host=os.environ.get('CACHE_REDIS_HOST'), password=os.environ.get('CACHE_REDIS_PASS'), ssl=True, db=0, decode_responses=True, port=6380)
 nltk.download('punkt')
 
 # Configurations
 app.config['SECRET_KEY'] = 'blah blah blah blah'
 
-class NameForm(FlaskForm):
-	name = StringField('Name')
-	submit = SubmitField('Submit')
+# class NameForm(FlaskForm):
+# 	name = StringField('Name')
+# 	submit = SubmitField('Submit')
 
 # ROUTES!
 @app.route('/', methods=['GET','POST'])
@@ -417,12 +423,125 @@ def quizt5():
 
 	
 	return render_template('quiz5.html', forms=forms, data_1=data_1, data_2=data_2)
+
+@app.route('/a7_teacher', methods=['GET', 'POST'])
+def a7_teacher():
+	forms = [NameForm(), QuestionForm(), GradeForm()]
+	form = None
+	data = { 'status': 'init' ,'active_index': 0, 't_name': '', 's_name': '', 
+			'score': [], 'question': [], 'time_started': None, 'time_ended': None}
+	if request.cookies.get('id') and r.exists(request.cookies.get('id')):
+		data = json.loads(r.get(request.cookies.get('id')))
+		append_room_id(r, request.cookies.get('id'))
+		data = r_get(r, request.cookies.get('id'))
+		if data['status'] in ['a', 'init']:
+			form = forms[1]
+		elif data['status'] in ['b', 'c']:
+			form = forms[2]
+	else:
+		form = forms[0]
+	
+	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
+		form = forms[0]
+		name = form.name.data
+		data.update({'t_name': name, 'status': 'init'})
+		r.set(request.cookies.get('id'), json.dumps(data))
+		form = forms[1]
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
+		form = forms[1]
+		question = form.question.data
+		data.update({'question': data['question'] + [{ 'q': question, 'a': ''}], 'status': 'b'})
+		r.set(request.cookies.get('id'), json.dumps(data))
+		socketio.emit('student', data) # send student the new question
+		socketio.emit('admin', data)
+		form = forms[2]
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_3' and forms[2].validate_on_submit():
+		form = forms[2]
+		grade = form.grade.data
+		data.update({'score': data['score'] + [grade], 'status': 'a'})
+		r.set(request.cookies.get('id'), json.dumps(data))
+		socketio.emit('student', data) # send student the new waiting for question
+		socketio.emit('admin', data)
+		form = forms[1]
+	elif request.method == 'POST' and request.form['submit'] == 'end' and EndGameForm().validate_on_submit():
+		id = request.args.get('id')
+		data = r_get(r, id)
+		data.update({'status': 'end', 'time_ended': int(time.time())})
+	elif request.method == 'POST' and request.form['submit'] == 'end' and EndGameForm().validate_on_submit():
+		id = request.cookies.get('id')
+		data = r_get(r, id)
+		data.update({'status': 'end', 'time_ended': int(time.time())})
+
+	return render_template('assignment_7_teacher.html', form=form, data=data, end_form=EndGameForm())
+
+@app.route('/a7_student', methods=['GET', 'POST'])
+def a7_student():
+	forms = [NameForm(), AnswerForm()]
+	form = None
+	rooms = None
+	# data = json.loads(r.get(request.cookies.get('id')))
+	if request.args.get('id') and request.method == 'GET':
+		if r.exists(request.args.get('id')):
+			data = r_get(r, request.args.get('id'))
+			if data['status'] == ['init', 'half_init']:
+				form = forms[0]
+			else:
+				form = forms[1]
+
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit() and request.args.get('id'):
+		form = forms[0]
+		name = form.name.data
+		id = request.args.get('id')
+		data = r_get(r, id)
+		data.update({'s_name': name, 'time_started': int(time.time()), 'status': 'a'})
+		r_set(r, id, data)
+		socketio.emit('teacher', data)
+		socketio.emit('admin', data)
+		form = forms[1]
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
+		form = forms[1]
+		answer = form.answer.data
+		id = request.args.get('id')
+		data = r_get(r, id)
+		data['question'][-1]['a'] = answer
+		data.update({'status': 'c'})
+		r_set(r, id, data)
+		socketio.emit('teacher', data)
+		socketio.emit('admin', data)
+		form = forms[0]
+	elif request.method == 'POST' and request.form['submit'] == 'end' and EndGameForm().validate_on_submit():
+		id = request.args.get('id')
+		data = r_get(r, id)
+		data.update({'status': 'end', 'time_ended': int(time.time())})
+	elif request.method == 'POST' and request.form['submit'] == 'end' and EndGameForm().validate_on_submit():
+		id = request.args.get('id')
+		data = r_get(r, id)
+		data.update({'status': 'end', 'time_ended': int(time.time())})
+	else:
+		rooms = list_rooms(r)
+	return render_template('assignment_7_student.html', rooms=rooms, form=form, end_form=EndGameForm())
+
+@app.route('/a7_admin', methods=['GET', 'POST'])
+def a7_admin():
+	forms = [HintForm()]
+	form = None
+	rooms = None
+
+	if request.method == 'GET':
+		rooms = list_rooms(r)
+	elif request.method == 'POST' and request.form['submit'] == 'end' and forms[0].validate_on_submit():
+		form = forms[0]
+		hint = form.hint.data
+		socketio.emit('student', {'hint': hint})
+	
+	if request.args.get('id'):
+		rooms = None
+		form = forms[0]
+
+	return render_template('assignment_7_admin.html', rooms=rooms, form=form, end_form=EndGameForm())
+
+
 ###
-
-@app.route('/a7', methods=['GET', 'POST'])
-def quiz7():
-	return render_template('assignment_7.html')
-
 @app.route('/help')
 def help():
 	text_list = []
@@ -462,16 +581,26 @@ def requests_error(error):
 def handle_message(data):
     print('received message: ' + data)
 
-@socketio.on('teacher_create_room') # init
-def teacher_create_room(data):
+@socketio.on('teacher_emit_updates') # init
+def teacher_emit_updates(data):
+	if r.exists(data['room_id']):
+		room_obj = r.get(data['room_id'])
+		socketio.emit('teacher', json.loads(room_obj))
+	else:
+		init_obj = json.dumps({ 'status': 'half_init' ,'active_index': 0, 't_name': '', 's_name': '',
+		'score': [], 'question': [], 'time_started': None, 'time_ended': None})
+		r.set(data['room_id'], init_obj)
+		socketio.emit('teacher', json.loads(r.get(data['room_id'])))
+
+
+@socketio.on('req_data')
+def request_data(data):
 	print(data)
-
-
-
+	if r.exists(data['room_id']):
+		socketio.emit(data['requestor'], r_get(r, data['room_id']))
 
 
 if os.environ.get('ENV') == 'local':
 	port = int(os.getenv('PORT', '3000'))
-	r.set
 	socketio.run(app, host='0.0.0.0', port=port, debug=True)
 	# app.run(host='0.0.0.0', port=port, debug=True)

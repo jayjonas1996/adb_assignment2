@@ -1,4 +1,5 @@
-from wtforms import StringField, IntegerField, SubmitField, FloatField, SelectField, DateField, BooleanField, FileField
+from wtforms import StringField, IntegerField, SubmitField, FloatField, \
+    SelectField, DateField, BooleanField, FileField, Label
 from wtforms import validators
 from flask_wtf import FlaskForm
 
@@ -108,3 +109,26 @@ class TextReplaceForm(FlaskForm):
 
 class CountStopwordsForm(FlaskForm):
     submit = SubmitField('Submit_3', name='submit')
+
+class NameForm(FlaskForm):
+    name = StringField('Name:', [validators.InputRequired()])
+    submit = SubmitField('Submit_1', name='submit')
+
+class QuestionForm(FlaskForm):
+    question = StringField('Question:', [validators.InputRequired()])
+    submit = SubmitField('Submit_2', name='submit')
+
+class GradeForm(FlaskForm):
+    grade = IntegerField('Grade:', [validators.InputRequired()])
+    submit = SubmitField('Submit_3', name='submit')
+
+class AnswerForm(FlaskForm):
+    answer = StringField('Answer:', [validators.InputRequired()])
+    submit = SubmitField('Submit_2', name='submit')
+
+class HintForm(FlaskForm):
+    hint = StringField('Hint:', [validators.InputRequired()])
+    submit = SubmitField('Submit_1', name='submit')
+
+class EndGameForm(FlaskForm):
+    submit = SubmitField('end', name='submit')

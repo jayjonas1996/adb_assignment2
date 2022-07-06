@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<script>
+    function show(id) {
+        document.getElementById('name-form').hidden = true;
+        document.getElementById('question-form').hidden = true;
+        document.getElementById('grade-form').hidden = true;
+
+        document.getElementById(id).hidden = false;
+    }
+
+    function setStatus(data) {
+        if (data['status'] == 'half_init') {
+            show('name-form');
+        }
+    }
+
+    function update(obj) {
+        socket.emit('teacher_emit_updates', obj);
+    }
+
+    const socket = io();
+    let timer;
+    socket.connect('"http://127.0.0.1:3000"');
+    // socket.it;
+    let id = (Math.random() + 1).toString(36).substring(7);
+    
+    document.cookie.split(';').forEach(function(item) { 
+        if (item.includes('id=')) {
+            id = item.split('=')[1];
+        }
+    });
+    console.log(id);
+    document.cookie = "id=" + id + "; expires=Fri, 31 Dec " + (new Date().getFullYear() + 1) + " 23:59:59 GMT; SameSite=None; Secure";
+
+    socket.on('connect', function ()  {
+        let urlparam = new URLSearchParams(window.location.search);
+        socket.emit('req_data', { 'room_id': id, 'requestor': 'teacher'});
+    });
+
+    socket.on('teacher', (data) => {
+        console.log(data);
+        if ('time_started' in data && data['time_started']) {
+            if (timer) {
+                clearInterval(timer);
+            }
+            timer = window.setInterval( () => {
+                let elapsed = Math.floor(new Date() / 1000) - data['time_started'];
+                document.getElementById("time").innerHTML = "The elapsed time is " + elapsed + " seconds. ";
+            });
+        }
+        // if ('message' in data && data['message']) {
+        //     document.getElementById('message').innerHTML = data['message'];
+        //     timer = window.setTimeout(() => {
+        //         document.getElementById('message').innerHTML = '';
+        //     }, 5000);
+        // }
+
+        if ('question' in data && data['question']) {
+            console.log(data['question'][data['question'].length - 1]['a']);
+            document.getElementById('answer').innerHTML = "Answer: " + data['question'][data['question'].length - 1]['a'];
+        }
+        
+    });
+
+</script>
+
+{% if data %}
+    {% if 't_name' in data %}
+        <h3>{{ data.t_name }}</h3>
+    {% endif %}    
+{% endif %}
+
+<div id='flask-form'>
+    {% if form %}
+        {{ wtf.quick_form(form) }}<br/>
+    {% endif %}
+</div>
+<div id='time'></div>
+<div id='answer'></div>
+
+<div id='message'>
+
+</div>
+
+
+{{ wtf.quick_form(end_form) }}
+
+
+
+{% endblock %}

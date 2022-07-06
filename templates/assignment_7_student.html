@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+
+<script>
+
+let timer;
+const socket = io();
+socket.connect('"http://127.0.0.1:3000"');
+
+socket.on('connect', function ()  {
+    let urlparam = new URLSearchParams(window.location.search);
+    socket.emit('req_data', { 'room_id': urlparam.get('id'), 'requestor': 'student'});
+});
+
+socket.on('student', (data) => {
+    console.log(data);
+    if ('time_started' in data && data['time_started']) {
+        if (timer) {
+            clearInterval(timer);
+        }
+            timer = window.setInterval( () => {
+            let elapsed = Math.floor(new Date() / 1000) - data['time_started'];
+            document.getElementById("time").innerHTML = "The elapsed time is " + elapsed + " seconds. ";
+        });
+    }
+
+    if ('question' in data && data['question']) {
+        document.getElementById('question').innerHTML = "Question: " + data['question'][data['question'].length - 1]['q'];
+        document.getElementById('hint').innerHTML = "";
+    }
+
+    if ('hint' in data && data['hint']) {
+        console.log(data['hint']);
+        document.getElementById('hint').innerHTML = "Hint: " + data['hint'];
+    }
+        
+    });
+</script>
+<div id='time'></div>
+<br>
+<div id='hint'></div>
+
+{% if data %}
+    {% if 's_name' in data %}
+        <h3>{{ data.s_name }}</h3>
+    {% endif %}    
+{% endif %}
+
+<div>
+    <span id='question'></span>
+</div>
+
+{% if rooms %}
+    {% for room in rooms %}
+        <a href="/a7_student?id={{ room }}">{{ room }}</a><br>
+    {% endfor %}
+{% endif %}
+
+{% if form %}
+    {{ wtf.quick_form(form) }}
+{% endif %}
+
+{{ wtf.quick_form(end_form) }}
+
+{% endblock %}
