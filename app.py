@@ -7,7 +7,7 @@ Web url: https://jkn-adb-a2.azurewebsites.net/quiz3
 import os, sys, timeit, random, json, urllib, re, string, time
 from socket import socket
 from collections import Counter
-from flask import Flask, render_template, url_for, flash, redirect, request
+from flask import Flask, render_template, url_for, flash, redirect, request, make_response
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_uploads import UploadSet, configure_uploads, IMAGES, patch_request_class
@@ -28,7 +28,7 @@ from storage import CloudStorage, NLP
 from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange, ClusterForm, \
 		BoundForm, NetMagRangeForm, DateForm, UpdateNetForm, VotesYearRangeForm, YearRangeForm, YearRangeNForm, \
 			FruitsForm, FruitsBarForm, FruitsScatterForm, TextFileUpload, TextReplaceForm, CountStopwordsForm, \
-				NameForm, QuestionForm, AnswerForm, GradeForm, HintForm, EndGameForm
+				NameForm, QuestionForm, AnswerForm, GradeForm, HintForm, EndGameForm, CourseRegisterForm, CoursesForm, SetAgeForm
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -541,6 +541,44 @@ def a7_admin():
 	return render_template('assignment_7_admin.html', rooms=rooms, form=form, end_form=EndGameForm())
 
 
+@app.route('/quiz6_student', methods=['GET', 'POST'])
+def quiz6_student():
+	db = DB(auto_close=False)
+	data = {}
+	forms = [CourseRegisterForm()]
+	# form = forms[0]
+	message = ""
+	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
+		form = forms[0]
+		student_id = form.id.data
+		course_id = form.course_id.data
+		section_id = form.section_id.data
+		data['columns'], data['rows'], message = db.query_register(student_id, course_id, section_id, r)
+		print(data, message)
+	
+	return render_template('quiz6_student.html', forms=forms, data=data, message=message)
+
+
+@app.route('/quiz6_admin', methods=['GET', 'POST'])
+def quiz6_admin():
+	db = DB(auto_close=False)
+	data = {}
+	forms = [SetAgeForm(), CoursesForm()]
+	message = ''
+	if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
+		form = forms[0]
+		age = form.age.data
+		r.set('age', int(age))
+	elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
+		form = forms[1]
+		course_id = form.course_id.data
+		section_id = form.section_id.data
+		data['columns'], data['rows'] = db.query_registeration(course_id, section_id)
+
+
+	return render_template('quiz6_student.html', forms=forms, data=data, message=message)
+
+
 ###
 @app.route('/help')
 def help():
@@ -601,6 +639,7 @@ def request_data(data):
 
 
 if os.environ.get('ENV') == 'local':
+	r.set('age', 0)
 	port = int(os.getenv('PORT', '3000'))
 	socketio.run(app, host='0.0.0.0', port=port, debug=True)
 	# app.run(host='0.0.0.0', port=port, debug=True)

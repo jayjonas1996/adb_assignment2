@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-# import pymssql
+import pymssql
 import pandas as pd
 import numpy as np
 
@@ -141,6 +141,47 @@ class DB:
     def query_range_fruit(self, low, high):
         cols = ['col1', 'col3']
         rows = self._execute('select col1, col3 from quiz4 where col1 between %d and %d', (low, high))
+        return cols, rows
+    
+    def query_student_id(self, id):
+        cols = ['id', 'Fname', 'Lname', 'Age', 'Credit']
+        rows = self._execute('select * from students where id = %d', (id))
+        return cols, rows
+    
+    def query_register(self, student_id, course_id, section_id, r):
+        cols = ['Student id', 'Course id', 'Section id']
+
+        is_registered = self._execute('select count(*) from registration where student_id = %d and course_id = %d and section_id = %d', (student_id, course_id, section_id))[0][0]
+        print(is_registered)
+        if is_registered > 0:
+            return [], [], f'Student {student_id} is already registered for course {course_id} and section {section_id}'
+
+        age_limit = int(r.get('age'))
+        age = int(self._execute('select age from students where id = %d', (student_id))[0][0])
+        if age < age_limit and course_id > 5000:
+            return [], [], f"Age {age} is less than allowed limit of {age_limit}"
+
+        course = self._execute('select * from class where Course = %d and Section = %d', (course_id, section_id))
+        course_limit = int(course[0][3])
+        students = self._execute('select count(*) from registration where course_id = %d and section_id = %d', (course_id, section_id))
+        if int(students[0][0]) >= course_limit:
+            return [], [], f"Class is full"
+
+        courses = self._execute('select course_id, section_id from registration where student_id = %d', (student_id))
+        print(courses)
+
+        rows = self._execute('select * from registration where student_id = %d', (student_id))
+        # for row in rows:
+
+        self._execute('insert into registration values (%d, %d, %d)', (student_id, course_id, section_id))
+        self.conn.commit()
+        rows = self._execute('select * from registration where student_id = %d', (student_id))
+
+        return cols, rows, ''
+    
+    def query_registeration(self, course_id, section_id):
+        cols = ['student id', 'course id', 'section id']
+        rows = self._execute('select * from registration where course_id = %d and section_id = %d', (course_id, section_id))
         return cols, rows
 
     def _execute(self, query, data=(), fetch=True):

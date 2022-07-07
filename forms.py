@@ -132,3 +132,22 @@ class HintForm(FlaskForm):
 
 class EndGameForm(FlaskForm):
     submit = SubmitField('end', name='submit')
+
+# class StudentIdForm(FlaskForm):
+#     id = IntegerField('id:', [validators.InputRequired()])
+#     submit = SubmitField('Submit_1', name='submit')
+
+class CourseRegisterForm(FlaskForm):
+    id = IntegerField('id:', [validators.InputRequired()])
+    course_id = IntegerField('Course id:', [validators.InputRequired()])
+    section_id = IntegerField('Section id:', [validators.InputRequired()])
+    submit = SubmitField('Submit_1', name='submit')
+
+class CoursesForm(FlaskForm):
+    course_id = IntegerField('Course id:', [validators.InputRequired()])
+    section_id = IntegerField('Section id:', [validators.InputRequired()])
+    submit = SubmitField('Submit_2', name='submit')
+
+class SetAgeForm(FlaskForm):
+    age = IntegerField('Age limit:', [validators.InputRequired()])
+    submit = SubmitField('Submit_1', name='submit')
