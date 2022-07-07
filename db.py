@@ -170,8 +170,23 @@ class DB:
         courses = self._execute('select course_id, section_id from registration where student_id = %d', (student_id))
         print(courses)
 
-        rows = self._execute('select * from registration where student_id = %d', (student_id))
-        # for row in rows:
+        rows = self._execute('select course_id, section_id from registration where student_id = %d', (student_id))
+        rows = self._execute('select * from class where Course = %d and Section = %d', (course_id, section_id))
+        m = 0
+        w = 0
+        f = 0
+        t = 0
+        tr = 0
+        for row in rows:
+            print(row)
+            m += row[2].count('M')
+            w += row[2].count('W')
+            f += row[2].count('F')
+            tr += row[2].count('TR')
+            t += (row[2].count('TR') - row[2].count('T'))
+        if (course[0][2].count('M') > 0 and m == 2) and (course[0][2].count('W') > 0 and w == 2) and \
+            (course[0][2].count('F') > 0 and f == 2) and (course[0][2].count('T') > 0 and T == 2) and (course[0][2].count('TR') > 0 and tr == 2):
+            return [], [], f"Per day class limit exceeded"
 
         self._execute('insert into registration values (%d, %d, %d)', (student_id, course_id, section_id))
         self.conn.commit()

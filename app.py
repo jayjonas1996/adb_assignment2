@@ -546,7 +546,6 @@ if os.environ.get('TYPE') == 'STUDENT':
 		db = DB(auto_close=False)
 		data = {}
 		forms = [CourseRegisterForm()]
-		# form = forms[0]
 		message = ""
 		if request.method == 'POST' and request.form['submit'] == 'Submit_1' and forms[0].validate_on_submit():
 			form = forms[0]
@@ -569,6 +568,7 @@ if os.environ.get('TYPE') == 'ADMIN':
 			form = forms[0]
 			age = form.age.data
 			r.set('age', int(age))
+			message = f"SUCCESS: {age} is the new age limit"
 		elif request.method == 'POST' and request.form['submit'] == 'Submit_2' and forms[1].validate_on_submit():
 			form = forms[1]
 			course_id = form.course_id.data

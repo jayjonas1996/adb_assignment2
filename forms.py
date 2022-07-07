@@ -151,3 +151,8 @@ class CoursesForm(FlaskForm):
 class SetAgeForm(FlaskForm):
     age = IntegerField('Age limit:', [validators.InputRequired()])
     submit = SubmitField('Submit_1', name='submit')
+
+class NameForm(FlaskForm):
+    f_name = StringField('first name', [validators.InputRequired()])
+    l_name = StringField('last name', [validators.InputRequired()])
+    submit = SubmitField('Submit_2', name='submit')
