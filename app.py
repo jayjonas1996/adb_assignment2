@@ -613,31 +613,31 @@ def requests_error(error):
 	return render_template('500.html',title='500')
 
 
-@socketio.on('message')
-def handle_message(data):
-    print('received message: ' + data)
+# @socketio.on('message')
+# def handle_message(data):
+#     print('received message: ' + data)
 
-@socketio.on('teacher_emit_updates') # init
-def teacher_emit_updates(data):
-	if r.exists(data['room_id']):
-		room_obj = r.get(data['room_id'])
-		socketio.emit('teacher', json.loads(room_obj))
-	else:
-		init_obj = json.dumps({ 'status': 'half_init' ,'active_index': 0, 't_name': '', 's_name': '',
-		'score': [], 'question': [], 'time_started': None, 'time_ended': None})
-		r.set(data['room_id'], init_obj)
-		socketio.emit('teacher', json.loads(r.get(data['room_id'])))
-
-
-@socketio.on('req_data')
-def request_data(data):
-	print(data)
-	if r.exists(data['room_id']):
-		socketio.emit(data['requestor'], r_get(r, data['room_id']))
+# @socketio.on('teacher_emit_updates') # init
+# def teacher_emit_updates(data):
+# 	if r.exists(data['room_id']):
+# 		room_obj = r.get(data['room_id'])
+# 		socketio.emit('teacher', json.loads(room_obj))
+# 	else:
+# 		init_obj = json.dumps({ 'status': 'half_init' ,'active_index': 0, 't_name': '', 's_name': '',
+# 		'score': [], 'question': [], 'time_started': None, 'time_ended': None})
+# 		r.set(data['room_id'], init_obj)
+# 		socketio.emit('teacher', json.loads(r.get(data['room_id'])))
 
 
+# @socketio.on('req_data')
+# def request_data(data):
+# 	print(data)
+# 	if r.exists(data['room_id']):
+# 		socketio.emit(data['requestor'], r_get(r, data['room_id']))
+
+r.set('age', 0)
 if os.environ.get('ENV') == 'local':
-	r.set('age', 0)
+	# r.set('age', 0)
 	port = int(os.getenv('PORT', '3000'))
 	# socketio.run(app, host='0.0.0.0', port=port, debug=True)
 	# app.run(host='0.0.0.0', port=port, debug=True)
