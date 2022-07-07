@@ -33,8 +33,7 @@ from forms import SearchRangeForm, SearchNearestForm, SearchNearestWithMagRange,
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 load_dotenv('.env')
-socketio = SocketIO(app, cors_allowed_origins=["https://3000-jayjonas199-adbassignme-4lbv9t5nkbi.ws-us51.gitpod.io", 
-"http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:5000"])
+# socketio = SocketIO(app, cors_allowed_origins=["https://3000-jayjonas199-adbassignme-4lbv9t5nkbi.ws-us51.gitpod.io", "http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:5000"])
 
 r = redis.StrictRedis(host=os.environ.get('CACHE_REDIS_HOST'), password=os.environ.get('CACHE_REDIS_PASS'), ssl=True, db=0, decode_responses=True, port=6380)
 nltk.download('punkt')
