@@ -639,5 +639,5 @@ def request_data(data):
 if os.environ.get('ENV') == 'local':
 	r.set('age', 0)
 	port = int(os.getenv('PORT', '3000'))
-	socketio.run(app, host='0.0.0.0', port=port, debug=True)
+	# socketio.run(app, host='0.0.0.0', port=port, debug=True)
 	# app.run(host='0.0.0.0', port=port, debug=True)
